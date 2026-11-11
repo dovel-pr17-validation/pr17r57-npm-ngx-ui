@@ -1,0 +1,81 @@
+@use 'colors/colors' as colors;
+
+.ngx-alert-dialog {
+  .ngx-dialog-content {
+    padding: var(--spacing-0);
+    background: var(--grey-725);
+
+    .ngx-dialog-header {
+      padding: 1.4rem 2rem 0 2rem;
+      border-radius: var(--radius-4);
+
+      h1 {
+        font-size: var(--font-size-l);
+        margin: var(--spacing-0);
+        color: white;
+        font-weight: var(--font-weight-semibold);
+      }
+    }
+
+    .ngx-dialog-body {
+      padding: 0.5rem 2rem;
+      color: var(--grey-300);
+    }
+
+    .ngx-dialog-footer {
+      padding: 1.4rem 2rem;
+    }
+  }
+
+  &.alert {
+    .ngx-dialog-content {
+      .ngx-dialog-header {
+        padding: 1.4rem 2rem;
+        border-left: 5px solid var(--blue-500);
+        background: var(--grey-750);
+
+        .close-button {
+          float: right;
+          background: var(--blue-500);
+          color: white;
+        }
+      }
+
+      .ngx-dialog-body {
+        padding: 1.4rem 2rem;
+      }
+
+      &.ngx-alert-danger {
+        .ngx-dialog-header {
+          border-left-color: var(--color-error);
+
+          .close-button {
+            background: var(--color-error);
+            color: white;
+          }
+        }
+      }
+
+      &.ngx-alert-warning {
+        .ngx-dialog-header {
+          border-left-color: var(--orange-500);
+
+          .close-button {
+            background: var(--orange-500);
+            color: var(--grey-800);
+          }
+        }
+      }
+    }
+  }
+
+  &.prompt,
+  &.confirm {
+    text-align: center;
+
+    .ngx-dialog-footer {
+      padding: 0.5rem 2rem 1.4rem 2rem;
+      text-align: center;
+    }
+  }
+}

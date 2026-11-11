@@ -1,0 +1,302 @@
+@use 'colors/colors' as colors;
+@use 'forms/variables' as forms;
+
+$calendar-bg: var(--grey-800);
+$calender-border: #2d3544;
+$animation-timing: 200ms;
+$input-invalid-color: var(--red-500);
+
+.ngx-date-time {
+  position: relative;
+  display: block;
+  max-width: 100%;
+
+  &.md {
+    .ngx-input {
+      font-size: var(--font-size-l) !important;
+    }
+  }
+
+  &.lg {
+    .ngx-input {
+      font-size: var(--font-size-xl) !important;
+    }
+  }
+
+  .calendar-dialog-btn {
+    display: inline-flex;
+    position: absolute;
+    padding: var(--spacing-0);
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--grey-200);
+    z-index: 2;
+  }
+
+  .ngx-input-box-wrap {
+    padding-right: 25px;
+  }
+
+  &.no-label {
+    .calendar-dialog-btn {
+      top: 0.5rem;
+      transform: translateY(0);
+    }
+  }
+
+  &.fill {
+    .calendar-dialog-btn {
+      right: 10px;
+    }
+
+    &.no-label {
+      .calendar-dialog-btn {
+        transform: translateY(0);
+      }
+    }
+  }
+
+  &.autosize {
+    display: inline-block;
+
+    .calendar-dialog-btn {
+      transform: translateY(-25%);
+    }
+
+    &.fill .calendar-dialog-btn {
+      transform: translateY(-15%);
+    }
+
+    &.marginless .calendar-dialog-btn {
+      transform: translateY(-35%);
+    }
+
+    &.no-label {
+      .calendar-dialog-btn {
+        transform: translateY(0);
+      }
+    }
+
+    .ngx-input-hint {
+      position: relative;
+
+      .date-time-hint {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        max-width: 100%;
+        white-space: nowrap;
+
+        > * {
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+
+  &--date-invalid,
+  &--date-out-of-range,
+  &.invalid.ng-touched,
+  &.ng-invalid.ng-touched,
+  &.ng-invalid.ng-dirty {
+    .ngx-input-underline {
+      background-color: forms.$input-invalid-color !important;
+
+      .underline-fill {
+        background-color: forms.$input-invalid-color !important;
+      }
+    }
+
+    .ngx-input .ngx-input-label,
+    .ngx-input.focused .ngx-input-label {
+      color: forms.$input-invalid-color !important;
+    }
+
+    .ngx-input-hint {
+      color: forms.$input-invalid-color !important;
+    }
+
+    .ngx-input-box,
+    .ngx-input-textarea {
+      caret-color: forms.$input-invalid-color !important;
+    }
+  }
+
+  &--has-popup {
+    input {
+      text-decoration-line: underline;
+      text-decoration-style: dashed;
+      text-decoration-thickness: from-font;
+    }
+  }
+}
+
+.ngx-dialog .ngx-dialog-content.ngx-date-time-dialog {
+  padding: var(--spacing-0) !important;
+  width: auto;
+
+  h1 {
+    font-size: 1.2rem;
+    white-space: nowrap;
+
+    small {
+      color: var(--grey-100);
+    }
+  }
+
+  .selected-header {
+    border-top: 1px solid var(--grey-700);
+    border-left: 1px solid var(--grey-700);
+    border-right: 1px solid var(--grey-700);
+    border-top-left-radius: var(--radius-6);
+    border-top-right-radius: var(--radius-6);
+    padding: var(--spacing-4) var(--spacing-20);
+    background: var(--blue);
+    color: var(--grey-100);
+  }
+
+  .time-row {
+    background: $calendar-bg;
+    border-left: 1px solid var(--grey-700);
+    border-right: 1px solid var(--grey-700);
+    border-bottom: 1px solid var(--grey-700);
+    padding: var(--spacing-8) var(--spacing-16) var(--spacing-8) var(--spacing-16);
+    margin-top: var(--spacing-0);
+    height: 94px;
+    width: 270px; // Same as ngx-calendar width
+    flex-direction: row;
+    box-sizing: border-box;
+    display: flex;
+    place-content: stretch center;
+    align-items: baseline;
+    gap: var(--spacing-8);
+
+    > * {
+      flex: 1;
+    }
+
+    .ampm-container {
+      flex: 0 0 calc(15% - 6px);
+    }
+
+    .ngx-input {
+      margin-top: var(--spacing-0);
+      padding-top: var(--spacing-0);
+      width: 100%;
+
+      &.milliseconds {
+        width: 55px;
+      }
+
+      .ngx-input-underline {
+        background-color: forms.$color-input-text;
+      }
+    }
+
+    button.ampm {
+      color: var(--grey-500);
+
+      &.selected {
+        color: var(--white);
+      }
+    }
+  }
+
+  .ngx-calendar {
+    box-shadow: none;
+    border-radius: 0px;
+
+    .title-row {
+      background: none;
+    }
+
+    .day-name-row {
+      margin-top: var(--spacing-0);
+    }
+  }
+
+  .ngx-dialog-footer {
+    border: 1px solid $calender-border;
+    border-bottom-left-radius: var(--radius-6);
+    border-bottom-right-radius: var(--radius-6);
+    border-top: 0;
+    padding: 0.5rem var(--spacing-0);
+    flex-direction: row;
+    box-sizing: border-box;
+    display: flex;
+
+    > * {
+      flex: 1 1 50%;
+    }
+
+    .btn {
+      font-size: var(--font-size-m);
+      color: var(--grey-400);
+      margin: var(--spacing-0);
+      padding: var(--spacing-0);
+    }
+
+    .today-btn {
+      margin-left: var(--spacing-16);
+      opacity: 1;
+      transition: opacity $animation-timing;
+
+      &[hidden] {
+        display: inline-block !important;
+        opacity: 0;
+      }
+    }
+
+    .apply-btn {
+      margin-right: var(--spacing-16);
+      color: var(--blue-400);
+    }
+
+    .clear-btn {
+      margin-right: var(--spacing-16);
+    }
+  }
+}
+
+.ngx-tooltip-content.date-tip-tooltip {
+  padding: var(--spacing-4);
+
+  .date-zone-display {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-m);
+    color: var(--grey-700);
+
+    > span {
+      display: inline-block;
+    }
+
+    button {
+      float: right;
+      font-weight: var(--font-weight-bold);
+      line-height: 16px;
+      font-size: var(--font-size-xs);
+      text-transform: uppercase;
+      color: var(--grey-700);
+      background: #dee1ea;
+      margin-left: var(--spacing-4);
+      padding: var(--spacing-0) 6px;
+      vertical-align: text-top;
+      text-align: left;
+      min-width: 70px;
+
+      ngx-icon {
+        padding-right: var(--spacing-4);
+      }
+
+      &:hover,
+      &:active,
+      &:active:hover:focus:not(.disabled),
+      &:active:hover:focus:not([disabled]) {
+        background: #fff;
+      }
+    }
+  }
+}

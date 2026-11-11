@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "projects/swimlane/ngx-ui/src/vitest-globals.ts",
+    "projects/**/test.ts",
+    "projects/**/*.spec.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

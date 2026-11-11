@@ -1,0 +1,36 @@
+<div class="slider-inner">
+  @if (showTicks) {
+    <div class="ticks-container">
+      @for (s of _ticks; track $index) {
+        <div class="tick" [ngStyle]="s"></div>
+      }
+    </div>
+  }
+  <div class="inputs">
+    <div class="slider-track"></div>
+    @if (filled) {
+      <span [ngStyle]="_fill" class="fill-bar"> </span>
+    }
+    @for (value of _values; track $index; let i = $index; let odd = $odd) {
+      <input
+        type="range"
+        [id]="id + '-' + i"
+        [attr.list]="id + '-list'"
+        [attr.orientation]="orientation"
+        [class.odd]="odd"
+        [class.active]="_active[i]"
+        [ngModel]="value"
+        (ngModelChange)="setValue($event, i)"
+        [min]="min"
+        [max]="max"
+        [step]="step"
+        [disabled]="disabled"
+        (input)="onChange($event)"
+        (change)="onChange($event)"
+        (mouseenter)="setActive(i, true)"
+        (mouseleave)="setActive(i, false)"
+        />
+      <div class="slider-thumb" [class.active]="_active[i]" [ngStyle]="_thumbs[i]"></div>
+    }
+  </div>
+</div>

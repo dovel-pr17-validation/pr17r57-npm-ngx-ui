@@ -1,0 +1,21 @@
+<label class="radio-label" [attr.for]="radioId"
+  [tabIndex]="(disabled || isInGroup) ? -1 : tabindex"
+  (keydown.space)="onSpace($event)">
+  <input
+    type="radio"
+    class="radio-input"
+    tabIndex="-1"
+    [id]="radioId"
+    [attr.aria-checked]=checked
+    [checked]="checked"
+    [disabled]="disabled"
+    [name]="name"
+    (focus)="onFocus($event)"
+    (blur)="blur.emit($event)"
+    (change)="_onInputChange($event)"
+  />
+  <span class="checkmark"></span>
+  <div class="radio-label--content">
+    <ng-content></ng-content>
+  </div>
+</label>

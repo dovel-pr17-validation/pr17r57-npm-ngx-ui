@@ -1,0 +1,22 @@
+@use 'colors' as colors;
+@use 'forms/variables' as forms;
+
+select {
+  background: forms.$color-input-bg;
+  border: solid 1px forms.$color-input-border;
+  color: forms.$color-input-text;
+  border-radius: 2px;
+  height: 32px;
+  line-height: 32px;
+  font-size: 13px;
+  width: 100%;
+
+  &:focus {
+    outline: none;
+  }
+
+  &[disabled] {
+    cursor: not-allowed;
+    color: colors.$color-blue-grey-300;
+  }
+}

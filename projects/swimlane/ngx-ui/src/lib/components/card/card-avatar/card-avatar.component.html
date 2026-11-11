@@ -1,0 +1,18 @@
+<div class="ngx-card-avatar--avatar" [ngClass]="{'has-status': status}">
+  <div class="inner-logo">
+    @if (status) {
+      <div class="status" [ngClass]="status"></div>
+    }
+    @if (src) {
+      <img
+        class="ngx-card-avatar--img"
+        [class.ngx-card-avatar--img__default-background]="removeImageBackground"
+        [src]="src"
+        draggable="false"
+        />
+    }
+    <div class="ngx-card-avatar--content">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,477 @@
+/**
+ * DateRangePickerComponent
+ * ------------------------
+ * A fully configurable, Angular component to pick and emit a date range.
+ *
+ *  Usage:
+ * <ngx-date-range-picker
+ *   [presets]="customPresets"                     // Optional: override default presets
+ *   [parseFn]="customParseFunction"               // Optional: function to parse expressions like now-7d
+ *   [showTooltip]="true"                          // Optional: toggle tooltip
+ *   [placeholders]="{ start: 'Start...', end: 'End...' }" // Optional: custom input placeholders
+ *   [minDate]="startOfDay(subDays(new Date(), 30))"     // Optional: disallow dates before minDate
+ *   [maxDate]="endOfDay(new Date())"                    // Optional: disallow dates after maxDate
+ *   (apply)="handleApply($event)"
+ *   (cancel)="handleCancel()"
+ * ></ngx-date-range-picker>
+ *
+ * This component is designed for reusability and composability in libraries and apps.
+ */
+
+import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+  ViewChild,
+  ViewEncapsulation,
+  ChangeDetectionStrategy
+} from '@angular/core';
+import { DateRangeForm, TooltipDateItem } from './models/date-range.model';
+
+import { addMonths, endOfDay, endOfMonth, format, isValid, startOfDay, startOfMonth } from 'date-fns';
+import { DropdownComponent } from '../dropdown/dropdown.component';
+import { DateUtils } from './services/date-utils.service';
+import moment from 'moment-timezone';
+import { Clipboard } from '@angular/cdk/clipboard';
+import { NotificationService } from '../notification/notification.service';
+import { Datelike } from '../date-time/date-like.type';
+import { DATE_DISPLAY_FORMATS } from '../../enums/date-formats.enum';
+import { NotificationStyleType } from '../notification/notification-style-type.enum';
+
+const guessTimeZone = moment.tz.guess();
+
+@Component({
+  selector: 'ngx-date-range-picker',
+  templateUrl: './date-range-picker.component.html',
+  styleUrls: ['./date-range-picker.component.scss'],
+  encapsulation: ViewEncapsulation.None,
+  // eslint-disable-next-line @angular-eslint/prefer-on-push-component-change-detection
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
+})
+export class DateRangePickerComponent implements OnInit, OnChanges {
+  @Input() presets: {
+    label: string;
+    range: () => [Date | null, Date | null];
+    expression?: { start: string; end: string };
+  }[] = DateUtils.getDefaultPresets(DateUtils.parseExpression);
+  @Input() parseFn: (expr: string, context?: 'start' | 'end') => Date = DateUtils.parseExpression;
+  @Input() showTooltip = true;
+  @Input() placeholders = { start: 'Start (e.g., now-7d)', end: 'End (e.g., now)' };
+  @Input()
+  timezones: Record<string, string> = {
+    UTC: 'Etc/UTC',
+    Local: ''
+  };
+  @Input() selectedRange: { start: string; end: string } | null = null;
+  @Input() minDate: Date | null = null;
+  @Input() maxDate: Date | null = null;
+
+  @Output() apply = new EventEmitter<{
+    start: Date;
+    end: Date;
+    label: string;
+    tooltipValues: {
+      startTime: Record<string, { key: string; clip: string; display: string }>;
+      endTime: Record<string, { key: string; clip: string; display: string }>;
+    };
+    startExpression: string;
+    endExpression: string;
+  }>();
+  @Output() cancel = new EventEmitter<string>();
+  @ViewChild('wrapperRef', { static: false }) wrapperRef!: DropdownComponent;
+
+  private readonly dateFormat: string = 'yyyy-MM-dd HH:mm:ss';
+  lastConfirmedRange: { startDate: Date; endDate: Date; startRaw: string; endRaw: string } = null;
+
+  form: DateRangeForm = { startRaw: '', endRaw: '', startDate: null, endDate: null };
+
+  showPicker = false;
+  validationError: string | null = null;
+  selectedPreset = null;
+  selectedLabel = 'Select a range';
+  pickerStyles: { [key: string]: string } = {};
+  rangeModel: { startDate: Date; endDate: Date } = { startDate: new Date(), endDate: new Date() };
+  rangeModelRightCalendar: { startDate: Date; endDate: Date } = { startDate: null, endDate: null };
+
+  leftViewDate = new Date();
+  rightViewDate = addMonths(new Date(), 1);
+
+  // Left calendar constraints (current month)
+  leftMinDate = null;
+  leftMaxDate = endOfMonth(new Date());
+
+  // Right calendar constraints (next month and beyond)
+  nextMonth: Date = addMonths(new Date(), 1);
+  rightMinDate = startOfMonth(this.nextMonth);
+  rightMaxDate = null; // No upper limit or set manually
+  timeValueStart: Record<string, { key: string; clip: string; display: string }> = {};
+  timeValueEnd: Record<string, { key: string; clip: string; display: string }> = {};
+  availablePresets: DateRangePickerComponent['presets'] = [];
+
+  get isApplyDisabled(): boolean {
+    if (this.validationError) return true;
+
+    if (!this.form.startRaw?.trim() || !this.form.endRaw?.trim()) return true;
+
+    // If no start or end date selected
+    if (!this.form.startDate || !this.form.endDate) return true;
+
+    // If nothing changed compared to last confirmed range
+    if (
+      this.lastConfirmedRange &&
+      this.lastConfirmedRange.startDate?.getTime() === this.form.startDate.getTime() &&
+      this.lastConfirmedRange.endDate?.getTime() === this.form.endDate.getTime()
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private readonly clipboard: Clipboard,
+    private readonly notificationService: NotificationService
+  ) {}
+
+  ngOnInit() {
+    this.updateAvailablePresets();
+    this.updateCalendarConstraints();
+    this.initializeFromSelectedRange();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['selectedRange'] && changes['selectedRange'].currentValue) {
+      this.initializeFromSelectedRange();
+    }
+
+    if (changes['presets'] || changes['minDate'] || changes['maxDate']) {
+      this.updateAvailablePresets();
+    }
+
+    if (changes['minDate'] || changes['maxDate']) {
+      this.updateCalendarConstraints(this.form.startDate ?? undefined);
+    }
+  }
+
+  private updateAvailablePresets() {
+    this.availablePresets = this.presets.filter(preset => {
+      const [start, end] = preset.range();
+      return (!start || !this.isBeforeMinDate(start)) && (!end || !this.isAfterMaxDate(end));
+    });
+  }
+
+  private initializeFromSelectedRange() {
+    if (this.selectedRange) {
+      const startDate =
+        typeof this.selectedRange.start === 'string'
+          ? DateUtils.parseExpression(this.selectedRange.start)
+          : this.selectedRange.start;
+      const endDate =
+        typeof this.selectedRange.end === 'string'
+          ? DateUtils.parseExpression(this.selectedRange.end, 'end')
+          : this.selectedRange.end;
+      this.lastConfirmedRange = {
+        startDate,
+        endDate,
+        startRaw: this.selectedRange.start,
+        endRaw: this.selectedRange.end
+      };
+      this.form.startRaw = this.selectedRange.start;
+      this.form.endRaw = this.selectedRange.end;
+      this.form.startDate = startDate;
+      this.form.endDate = endDate;
+      this.rangeModel = { startDate, endDate };
+      this.setTooltipDate(startDate, endDate);
+      this.updateSelectedPresetByValue();
+    }
+  }
+
+  onRangeSelect(range: { startDate: Date; endDate: Date }) {
+    // Start is normalized to 00:00:00, capped at minDate when the first allowed day is picked
+    const startDate = startOfDay(range.startDate);
+    const cappedStartDate = this.isBeforeMinDate(startDate) ? this.minDate : startDate;
+
+    // If both dates already exist & user clicks again → reset to new start
+    if (this.form.startDate && this.form.endDate) {
+      this.form.startDate = cappedStartDate;
+      this.form.endDate = null;
+    } else if (!this.form.startDate || cappedStartDate < this.form.startDate) {
+      // If startDate is not yet set, or clicked date is before current startDate
+      this.form.startDate = cappedStartDate;
+      this.form.endDate = null;
+    } else {
+      // Normalize end date to 23:59:59.999 so the full selected day is included,
+      // capped at maxDate when the last allowed day is picked
+      const endDate = endOfDay(range.startDate);
+      this.form.endDate = this.isAfterMaxDate(endDate) ? this.maxDate : endDate;
+    }
+
+    this.rangeModel = {
+      startDate: this.form.startDate,
+      endDate: this.form.endDate || this.form.startDate
+    };
+
+    this.form.startRaw = this.form.startDate ? format(this.form.startDate, this.dateFormat) : '';
+    this.form.endRaw = this.form.endDate ? format(this.form.endDate, this.dateFormat) : '';
+    this.updateCalendarConstraints(this.form.startDate);
+    this.updateSelectedPresetByValue();
+    this.validationError = null;
+    this.cdr.detectChanges();
+  }
+
+  updateCalendarConstraints(selectedDate?: Date) {
+    const referenceDate = selectedDate ?? new Date();
+
+    // Left calendar: allow dates in the selected month and earlier
+    this.leftMinDate = null;
+    this.leftMaxDate = endOfMonth(referenceDate);
+
+    // Right calendar: allow dates from the start of next month onward
+    const nextMonth = addMonths(startOfMonth(referenceDate), 1);
+    this.rightMinDate = nextMonth;
+    this.rightMaxDate = null; // No upper limit unless needed
+
+    if (this.minDate) {
+      this.leftMinDate = this.minDate;
+      if (this.rightMinDate < this.minDate) {
+        this.rightMinDate = this.minDate;
+      }
+    }
+
+    if (this.maxDate) {
+      if (!this.leftMaxDate || this.leftMaxDate > this.maxDate) {
+        this.leftMaxDate = this.maxDate;
+      }
+      this.rightMaxDate = this.maxDate;
+    }
+  }
+
+  onCustomInputChange() {
+    const start = this.parseFn(this.form.startRaw);
+    const end = this.parseFn(this.form.endRaw, 'end');
+
+    if (!start || !end || !isValid(start) || !isValid(end)) {
+      this.validationError = `Invalid date expression`;
+      return;
+    }
+
+    if (this.isBeforeMinDate(start) || this.isBeforeMinDate(end)) {
+      this.validationError = 'Date cannot be before the minimum allowed date';
+      return;
+    }
+
+    if (this.isAfterMaxDate(start) || this.isAfterMaxDate(end)) {
+      this.validationError = 'Date cannot be after the maximum allowed date';
+      return;
+    }
+
+    if (start && end && start <= end) {
+      this.validationError = null;
+      this.form.startDate = start;
+      this.form.endDate = end;
+      this.rangeModel = { startDate: start, endDate: end };
+      this.updateCalendarConstraints(this.form.startDate);
+      this.updateSelectedPresetByValue();
+      this.cdr.detectChanges();
+    } else {
+      this.validationError = `"From" can't be after "To"`;
+    }
+  }
+
+  updateSelectedLabel() {
+    const { startDate, endDate } = this.form;
+    if (startDate && endDate) {
+      const matched = this.presets.find(preset => {
+        const [pStart, pEnd] = preset.range();
+        return pStart && pEnd && this.isEqual(pStart, startDate) && this.isEqual(pEnd, endDate);
+      });
+      this.selectedLabel = matched
+        ? matched.label
+        : `${format(startDate, this.dateFormat)} to ${format(endDate, this.dateFormat)}`;
+    }
+  }
+
+  private createMoment(date: Datelike): moment.Moment {
+    let momentDate = moment(date).clone();
+    const timezone = guessTimeZone;
+    momentDate = timezone ? momentDate.tz(timezone) : momentDate;
+    return momentDate;
+  }
+
+  updateSelectedPresetByValue() {
+    const { startDate, endDate } = this.form;
+    const matched = this.presets.find(p => {
+      const [s, e] = p.range();
+      return s && e && this.isEqual(s, startDate) && this.isEqual(e, endDate);
+    });
+    this.setTooltipDate(this.form.startDate, this.form.endDate);
+    this.selectedPreset = matched?.label || 'Custom range';
+  }
+
+  selectPreset(preset: {
+    label: string;
+    range: () => [Date | null, Date | null];
+    expression?: { start: string; end: string };
+  }) {
+    const [start, end] = preset.range();
+    if (start && end) {
+      this.form.startDate = start;
+      this.form.endDate = end;
+      this.rangeModel = { startDate: start, endDate: end };
+
+      this.form.startRaw = preset.expression?.start ?? format(start, this.dateFormat);
+      this.form.endRaw = preset.expression?.end ?? format(end, this.dateFormat);
+      this.setTooltipDate(this.form.startDate, this.form.endDate);
+
+      this.validationError = null;
+      this.selectedPreset = preset.label;
+      this.updateCalendarConstraints(this.form.startDate);
+      this.cdr.detectChanges();
+    }
+  }
+
+  isEqual(a: Date, b: Date): boolean {
+    return a && b && Math.abs(a.getTime() - b.getTime()) < 60000;
+  }
+
+  private isBeforeMinDate(date: Date): boolean {
+    return !!this.minDate && date.getTime() < this.minDate.getTime();
+  }
+
+  private isAfterMaxDate(date: Date): boolean {
+    return !!this.maxDate && date.getTime() > this.maxDate.getTime();
+  }
+
+  onApply() {
+    if (this.form.startDate && this.form.endDate) {
+      this.lastConfirmedRange = {
+        startDate: this.form.startDate,
+        endDate: this.form.endDate,
+        startRaw: this.form.startRaw,
+        endRaw: this.form.endRaw
+      };
+      this.updateSelectedLabel();
+      this.apply.emit({
+        start: this.form.startDate,
+        end: this.form.endDate,
+        label: this.selectedLabel,
+        tooltipValues: { startTime: this.timeValueStart, endTime: this.timeValueEnd },
+        startExpression: this.form.startRaw,
+        endExpression: this.form.endRaw
+      });
+      this.wrapperRef.open = false;
+    }
+  }
+
+  onCancel() {
+    if (this.lastConfirmedRange) {
+      this.form = {
+        startDate: this.lastConfirmedRange.startDate,
+        endDate: this.lastConfirmedRange.endDate,
+        startRaw: this.lastConfirmedRange.startRaw,
+        endRaw: this.lastConfirmedRange.endRaw
+      };
+      this.rangeModel = {
+        startDate: this.lastConfirmedRange.startDate,
+        endDate: this.lastConfirmedRange.endDate
+      };
+    } else {
+      // First-time cancel before any apply: reset form
+      this.form = {
+        startDate: null,
+        endDate: null,
+        startRaw: '',
+        endRaw: ''
+      };
+      this.rangeModel = { startDate: new Date(), endDate: new Date() };
+      this.selectedPreset = 'Custom range';
+      this.selectedLabel = 'Select a range';
+    }
+
+    this.validationError = null;
+    this.updateSelectedLabel();
+    this.cancel.emit(this.selectedLabel);
+    this.wrapperRef.open = false;
+  }
+
+  resetForm() {
+    this.form = {
+      startDate: null,
+      endDate: null,
+      startRaw: '',
+      endRaw: ''
+    };
+    this.rangeModel = { startDate: new Date(), endDate: new Date() };
+    this.validationError = null;
+    this.selectedPreset = 'Custom range';
+    this.selectedLabel = 'Select a range';
+    this.cdr.detectChanges();
+    this.apply.emit({
+      start: null,
+      end: null,
+      label: this.selectedLabel,
+      tooltipValues: { startTime: {}, endTime: {} },
+      startExpression: null,
+      endExpression: null
+    });
+    this.lastConfirmedRange = null;
+  }
+
+  openSearchStringDocPage() {
+    window.open('https://docs.swimlane.com/custom-and-relative-date-ranges-with-time-units', '_blank');
+  }
+
+  setTooltipDate(start: Date, end: Date) {
+    this.timeValueEnd = {};
+    this.timeValueStart = {};
+    if (start) {
+      const startMoment = this.createMoment(start);
+      this.timeValueStart = Object.keys(this.timezones).reduce(
+        (timezoneAcc, timezoneKey) => {
+          const timezoneValue = this.timezones[timezoneKey] || guessTimeZone;
+          const dateInTimezone = startMoment.clone().tz(timezoneValue);
+          timezoneAcc[timezoneKey] = {
+            key: timezoneKey,
+            clip: dateInTimezone.format(DATE_DISPLAY_FORMATS.fullDateTime),
+            display: dateInTimezone.format(DATE_DISPLAY_FORMATS.fullDateTime)
+          };
+          return timezoneAcc;
+        },
+        {} as Record<string, { key: string; clip: string; display: string }>
+      );
+    }
+    if (end) {
+      const endMoment = this.createMoment(end);
+      this.timeValueEnd = Object.keys(this.timezones).reduce(
+        (timezoneAcc, timezoneKey) => {
+          const timezoneValue = this.timezones[timezoneKey] || guessTimeZone;
+          const dateInTimezone = endMoment.clone().tz(timezoneValue);
+          timezoneAcc[timezoneKey] = {
+            key: timezoneKey,
+            clip: dateInTimezone.format(DATE_DISPLAY_FORMATS.fullDateTime),
+            display: dateInTimezone.format(DATE_DISPLAY_FORMATS.fullDateTime)
+          };
+          return timezoneAcc;
+        },
+        {} as Record<string, { key: string; clip: string; display: string }>
+      );
+    }
+    this.cdr.detectChanges();
+  }
+
+  onClick(item: TooltipDateItem) {
+    this.clipboard.copy(item.value.clip);
+    this.notificationService.create({
+      body: `${item.key} date copied to clipboard`,
+      styleType: NotificationStyleType.success,
+      timeout: 3000
+    });
+  }
+}

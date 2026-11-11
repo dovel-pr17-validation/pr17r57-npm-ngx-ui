@@ -1,0 +1,120 @@
+@use '../colors/colors' as colors;
+
+$color-input-bg: var(--grey-700);
+$color-input-border: var(--grey-600);
+$color-input-text: var(--grey-050);
+$color-input-text-placeholder: var(--grey-450);
+$color-input-text-disabled: var(--grey-400);
+
+$input-invalid-color: var(--red-500);
+$input-icon-color: var(--grey-300);
+$input-icon-color-hover: var(--grey-100);
+$input-placeholder-color: var(--grey-350);
+
+$color-fill-input-bg: var(--grey-875);
+
+$input-underline-height: 1px;
+$input-underline-height-fill: 2px;
+$input-active-underline-fill: var(--blue-500);
+$input-inactive-underline-fill: var(--grey-600);
+
+$input-label-color: var(--grey-350);
+$input-label-color-active: var(--blue-500);
+$input-label-font-size: var(--font-size-m);
+$input-label-font-size-active: 0.75rem;
+$input-label-font-weight: var(--font-weight-semibold);
+
+$input-hint-color: var(--grey-350);
+$input-hint-font-size: var(--font-size-xs);
+$input-hint-margin-top: var(--spacing-2);
+$input-hint-min-height: 1em;
+$input-hint-line-height: 14px;
+
+$input-min-width: 300px;
+$input-line-height: calc(1em + 0.75em);
+$input-margin-top: var(--spacing-16);
+$input-margin-bottom: var(--spacing-8);
+$input-padding-top: calc(#{$input-label-font-size-active} + 8px);
+
+$input-animation-duration: 150ms;
+
+@mixin input-box {
+  display: block;
+  max-width: 100%;
+  margin-top: $input-margin-top;
+  margin-bottom: $input-margin-bottom;
+  line-height: $input-line-height;
+  padding-top: $input-padding-top;
+  padding-bottom: var(--spacing-0);
+
+  &.marginless {
+    margin-top: var(--spacing-0);
+    margin-bottom: var(--spacing-0);
+  }
+
+  &.no-label {
+    padding-top: var(--spacing-0);
+  }
+}
+
+@mixin input-label {
+  position: absolute;
+  top: 0.5em;
+  line-height: var(--font-line-height-100);
+  pointer-events: none;
+  font-size: $input-label-font-size;
+  font-weight: $input-label-font-weight;
+  color: $input-label-color;
+  white-space: nowrap;
+  overflow-x: clip;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  transition:
+    color 0.2s ease-out,
+    font-size $input-animation-duration ease-out,
+    top $input-animation-duration ease-out;
+}
+
+@mixin input-hint {
+  font-size: $input-hint-font-size;
+  color: $input-hint-color;
+  margin-top: var(--spacing-8);
+  min-height: 1em;
+  line-height: $input-hint-line-height;
+  transition: color 0.2s ease-in-out;
+  &.hidden {
+    display: none;
+  }
+}
+
+@mixin input-underline {
+  width: 100%;
+  height: $input-underline-height;
+  background-color: $input-inactive-underline-fill;
+
+  .underline-fill {
+    background-color: $input-active-underline-fill;
+    transition: width 250ms ease-out;
+    width: 0;
+    height: $input-underline-height-fill;
+    margin: var(--spacing-0) auto;
+  }
+}
+
+@mixin input-fill-background {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: $color-fill-input-bg;
+    mix-blend-mode: exclusion;
+    pointer-events: none;
+    border-top-left-radius: var(--radius-4);
+    border-top-right-radius: var(--radius-4);
+  }
+}

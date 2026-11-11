@@ -1,0 +1,53 @@
+@use 'gradient-variables' as gradients;
+
+/**
+ * Gradients
+ */
+
+.gradient-blue {
+  background-image: gradients.$gradient-blue;
+}
+
+.gradient-blue-green {
+  background-image: gradients.$gradient-blue-green;
+}
+
+.gradient-blue-red {
+  background-image: gradients.$gradient-blue-red;
+}
+
+.gradient-blue-purple {
+  background-image: gradients.$gradient-blue-purple;
+}
+
+.gradient-red-orange {
+  background-image: gradients.$gradient-red-orange;
+}
+
+.gradient-orange-purple {
+  background-image: gradients.$gradient-orange-purple;
+}
+
+/**
+ * Gradient Backgrounds
+ */
+
+.bg-linear-1 {
+  background-image: gradients.$bg-linear-1;
+}
+
+.bg-linear-2 {
+  background-image: gradients.$bg-linear-2;
+}
+
+.bg-linear-3 {
+  background-image: gradients.$bg-linear-3;
+}
+
+.bg-radial-1 {
+  background-image: gradients.$bg-radial-1;
+}
+
+.bg-radial-2 {
+  background-image: gradients.$bg-radial-2;
+}

@@ -1,0 +1,278 @@
+@use 'sass:color';
+@use 'colors/colors' as colors;
+@use 'colors/shadow-variables' as shadows;
+
+$dropdown-bg: var(--grey-700);
+$dropdown-bg-hover: #232837; // Color 705 custom color
+$dropdown-color: var(--grey-100);
+
+/**
+ * Dropdown Component
+ *
+ * Builds on `~styles/components/lists`
+ */
+.ngx-dropdown {
+  position: relative;
+  padding-bottom: var(--spacing-10);
+  border-radius: var(--radius-4);
+
+  &.open {
+    .ngx-dropdown-menu {
+      display: block;
+    }
+  }
+
+  &.adjusted {
+    .ngx-dropdown-menu {
+      opacity: 1;
+      animation: openAnimation 0.25s;
+    }
+  }
+
+  &.has-caret {
+    .ngx-dropdown-menu:before {
+      display: block;
+    }
+  }
+
+  .ngx-dropdown-toggle {
+    cursor: pointer;
+    display: inline-block;
+
+    &.disabled {
+      cursor: not-allowed;
+
+      > a,
+      > button {
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .ngx-dropdown-menu--upwards {
+    bottom: 100%;
+    top: auto !important;
+    margin-bottom: 14px;
+
+    &::before {
+      transform: rotate(225deg) !important;
+      bottom: -7px;
+      top: auto !important;
+    }
+  }
+
+  .ngx-dropdown-menu {
+    position: absolute;
+    clear: left;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    min-width: 180px;
+    background: $dropdown-bg;
+    box-shadow: shadows.$shadow-3;
+    border-radius: var(--radius-8);
+    margin-top: 0;
+    opacity: 0;
+    display: none;
+    transition:
+      visibility 0s,
+      opacity 0.25s ease-out;
+
+    &::before {
+      z-index: -1;
+      content: ' ';
+      display: none;
+      position: absolute;
+      left: 12px;
+      top: -5px;
+      width: 12px;
+      height: 12px;
+      background: $dropdown-bg;
+      transform: rotate(45deg);
+      border-bottom: 0;
+      border-right: 0;
+    }
+
+    &.align-right {
+      left: auto;
+      right: 0;
+
+      &::before {
+        left: auto;
+        right: 6px;
+      }
+    }
+
+    > ul > li {
+      &:not(.divider) {
+        &:first-child {
+          border-top-left-radius: var(--radius-8);
+          border-top-right-radius: var(--radius-8);
+        }
+        &:last-child {
+          border-bottom-left-radius: var(--radius-8);
+          border-bottom-right-radius: var(--radius-8);
+        }
+      }
+
+      // Handle case where first child is a divider
+      &.divider:first-child + li {
+        border-top-left-radius: var(--radius-8);
+        border-top-right-radius: var(--radius-8);
+      }
+
+      // Handle case where last child is a divider - remove border radius from previous non-divider
+      &.divider:last-child {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      // Apply border radius to the actual last non-divider when last child is a divider
+      &:not(.divider):last-of-type {
+        border-bottom-left-radius: var(--radius-8);
+        border-bottom-right-radius: var(--radius-8);
+      }
+
+      > a,
+      > button {
+        padding: var(--spacing-4) var(--spacing-20);
+        clear: both;
+        line-height: var(--font-line-height-200);
+        white-space: nowrap;
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        box-shadow: none;
+        color: $dropdown-color;
+        font-size: var(--font-size-m);
+        display: block;
+      }
+
+      &:hover {
+        background: $dropdown-bg-hover;
+      }
+
+      &.divider,
+      &.divider-label {
+        height: initial;
+        margin: var(--spacing-0);
+        padding: var(--spacing-0) var(--spacing-20);
+        overflow: hidden;
+        background-color: initial !important;
+        color: var(--grey-400) !important;
+      }
+
+      // Floating dividers are hidden
+      &.divider {
+        display: none;
+        padding: var(--spacing-0);
+
+        hr {
+          margin: var(--spacing-2) var(--spacing-0);
+        }
+
+        &:first-child,
+        &:last-child {
+          display: none;
+        }
+      }
+
+      & + li.divider {
+        display: block;
+      }
+    }
+  }
+
+  @keyframes openAnimation {
+    0% {
+      transform: translateY(-25px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  @mixin ngx-dropdown-outline($menu-color, $menu-border, $item-active, $item-hover, $item-color) {
+    background: $menu-color;
+    min-width: 130px;
+    font-size: var(--font-size-xs);
+    border: 1px solid $menu-border;
+    background: $menu-color;
+
+    &:before {
+      border-top: 1px solid $menu-border;
+      border-left: 1px solid $menu-border;
+      background: $menu-color;
+      z-index: 10;
+      top: -7px;
+      transform: translate(-1.8px, 0) rotate(45deg); // small misalignment with ellipsis here
+    }
+
+    > ul {
+      padding: 9.5px var(--spacing-0);
+      margin: var(--spacing-2) var(--spacing-0) var(--spacing-0);
+      list-style: none;
+
+      > li {
+        padding-top: var(--spacing-0) !important;
+        color: $item-color;
+
+        > button,
+        > a {
+          cursor: pointer;
+          height: 26px;
+          display: block;
+          clear: both;
+          font-weight: var(--font-weight-regular);
+          line-height: var(--font-line-height-200);
+          white-space: nowrap;
+          font-size: var(--font-size-xs);
+          color: $item-color;
+        }
+
+        &:hover {
+          background: $item-hover;
+        }
+
+        &.active {
+          background: $item-active;
+          color: $item-color;
+
+          > button,
+          > a {
+            color: white;
+          }
+        }
+
+        &.divider hr {
+          border-bottom: 1px solid var(--grey-700);
+        }
+      }
+    }
+  }
+
+  // Styles
+  .ngx-dropdown-menu {
+    /* @deprecated Dark outline style is marked for deprecation and will be removed at a later date. */
+    &.ngx-dropdown-light-outline {
+      $menu-color: var(--grey-750);
+      $menu-border: var(--grey-550);
+      $item-active: #479eff;
+      $item-hover: #1f242f;
+      $item-color: #fff;
+
+      @include ngx-dropdown-outline($menu-color, $menu-border, $item-active, $item-hover, $item-color);
+    }
+
+    /* @deprecated This style is marked for deprecation and will be removed at a later date. */
+    &.ngx-dropdown-dark-outline {
+      $menu-color: var(--grey-750);
+      $menu-border: var(--grey-550);
+      $item-active: #479eff;
+      $item-hover: var(--grey-750);
+      $item-color: #afb7c8;
+
+      @include ngx-dropdown-outline($menu-color, $menu-border, $item-active, $item-hover, $item-color);
+    }
+  }
+}

@@ -1,0 +1,28 @@
+<div>
+  <input
+    #input
+    class="ngx-toggle-input"
+    type="checkbox"
+    [id]="id"
+    [(ngModel)]="value"
+    [required]="required"
+    [tabIndex]="tabIndex"
+    [disabled]="disabled"
+    [name]="name"
+    (blur)="onBlur()"
+    />
+  <label [attr.for]="id" class="ngx-toggle-label">
+    @if (showIcons && value) {
+      <span class="ngx-icon ngx-check"></span>
+    }
+    @if (showIcons && !value) {
+      <span class="ngx-icon ngx-x"></span>
+    }
+  </label>
+  <label [attr.for]="id" class="ngx-toggle-text">
+    @if (label) {
+      <span [innerHTML]="label"></span>
+    }
+    <ng-content></ng-content>
+  </label>
+</div>

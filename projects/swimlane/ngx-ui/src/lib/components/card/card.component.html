@@ -1,0 +1,45 @@
+@if (selected && !outlineText && !error) {
+  <div class="ngx-card--outline"></div>
+}
+@if (error && !outlineText) {
+  <div class="ngx-card--outline error"></div>
+}
+
+@if (outlineText) {
+  <div class="ngx-card--outline-text" [class.error]="error">
+    <div class="inner-text" (click)="onOutlineClick($event)">{{ outlineText }}</div>
+  </div>
+}
+
+@if (status && !statusTooltip) {
+  <div class="ngx-card--status" [ngClass]="status"></div>
+}
+@if (status && statusTooltip) {
+  <div
+    class="ngx-card--status"
+    ngx-tooltip
+    tooltipType="tooltip"
+    [tooltipTitle]="statusTooltip"
+    [ngClass]="status"
+  ></div>
+}
+
+@if (selectable) {
+  <ngx-checkbox
+    class="ngx-card--select"
+    round
+    [(ngModel)]="selected"
+    (click)="$event.stopPropagation()"
+    (change)="onSelect($event)"
+  ></ngx-checkbox>
+}
+
+@if (allowHoverTemplate) {
+  <div class="ngx-card-hover-section">
+    <ng-content select="ngx-card-hover-section"></ng-content>
+  </div>
+}
+<ng-content></ng-content>
+@if (!hideAccent) {
+  <div class="ngx-card--accent"></div>
+}

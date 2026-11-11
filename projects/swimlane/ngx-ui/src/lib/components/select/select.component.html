@@ -1,0 +1,64 @@
+<div class="ngx-select-wrap">
+  <div class="ngx-select-flex-wrap" [style.min-width]="autosize ? autosizeMinWidth : undefined">
+    <div class="ngx-select-flex-wrap-inner">
+      <ngx-select-input
+        [selectId]="id"
+        [autofocus]="autofocus"
+        [options]="options"
+        [allowClear]="allowClear"
+        [label]="label"
+        [requiredIndicator]="requiredIndicatorView"
+        [placeholder]="placeholder"
+        [placeholderTemplate]="placeholderTemplate"
+        [multiple]="multiple"
+        [identifier]="identifier"
+        [tagging]="tagging"
+        [allowAdditions]="allowAdditions"
+        [maxSelections]="maxSelections"
+        [taggingValidator]="taggingValidator"
+        [selectCaret]="selectCaret"
+        [selected]="value"
+        [hint]="inputHint"
+        [withHint]="withHint"
+        [disableDropdown]="disableDropdown"
+        [disabled]="disabled"
+        (keyup)="onKeyUp($event)"
+        (toggle)="onToggle()"
+        (close)="onClose(true)"
+        (activate)="onFocus()"
+        (activateLast)="onFocusLast()"
+        (selection)="onInputSelection($event)"
+        (taggingError)="onTaggingError($event)"
+      >
+      </ngx-select-input>
+    </div>
+  </div>
+  @if (dropdownVisible) {
+    <ngx-select-dropdown
+      [focusIndex]="focusIndex"
+      [filterQuery]="filterQuery"
+      [filterPlaceholder]="filterPlaceholder"
+      [filterCaseSensitive]="filterCaseSensitive"
+      [allowAdditions]="allowAdditions"
+      [allowAdditionsText]="allowAdditionsText"
+      [selected]="value"
+      [groupBy]="groupBy"
+      [groupByTemplate]="groupByTemplate"
+      [emptyPlaceholder]="emptyPlaceholder"
+      [tagging]="tagging"
+      [filterEmptyPlaceholder]="filterEmptyPlaceholder"
+      [filterable]="filterable"
+      [identifier]="identifier"
+      [options]="options"
+      [multiple]="multiple"
+      (keyup)="keyup.emit($event)"
+      (close)="onClose(true)"
+      (clearQueryFilter)="clearQueryFilter.emit()"
+      (selection)="onDropdownSelection($event)"
+      (deselection)="onDropdownDeselection($event)"
+      (keyboardSelection)="onDropdownSelection($event, false)"
+      (keyboardDeselection)="onDropdownDeselection($event, false)"
+    >
+    </ngx-select-dropdown>
+  }
+</div>

@@ -1,0 +1,73 @@
+@use 'colors/colors' as colors;
+
+ngx-list-row {
+  &.ngx-list-row {
+    background-color: colors.$color-blue-grey-800;
+    border: 1px solid colors.$color-blue-grey-600;
+    border-radius: 0.25rem;
+    display: grid;
+    align-items: center;
+    margin: 0.25rem 1rem 0rem 1rem;
+    padding-inline: 1rem;
+    position: relative;
+
+    &::before {
+      content: '';
+      width: 3px;
+      position: absolute;
+      left: 0;
+      height: 100%;
+      border-top-left-radius: 0.25rem;
+      border-bottom-left-radius: 0.25rem;
+    }
+
+    &--error::before {
+      background-color: colors.$color-red-500;
+    }
+
+    &--success::before {
+      background-color: colors.$color-green-500;
+    }
+
+    &--warning::before {
+      background-color: colors.$color-orange-400;
+    }
+
+    &--disabled {
+      opacity: 0.55;
+    }
+
+    .ngx-list-row__content {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-16);
+      min-width: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .ngx-list-row__checkbox,
+    .ngx-list-row__checkbox-spacer {
+      flex: 0 0 auto;
+    }
+
+    // Non-selectable rows keep the gutter so their columns line up with the headers.
+    .ngx-list-row__checkbox-spacer {
+      width: 18px;
+    }
+
+    .ngx-list-row__checkbox {
+      // ngx-checkbox reserves trailing label margin; list checkboxes have no label.
+      .ngx-checkbox--box {
+        margin-right: 0;
+      }
+    }
+
+    .ngx-list-row__columns {
+      flex: 1 1 auto;
+      min-width: 0;
+      align-items: center;
+      overflow: hidden;
+    }
+  }
+}

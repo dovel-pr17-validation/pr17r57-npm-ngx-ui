@@ -1,0 +1,15 @@
+<div class="ngx-step--title">
+  {{ label }}
+</div>
+
+<div class="ngx-step--step">
+  <div class="ngx-step--circle" (click)="active = step">
+    @if (icon) {
+      <i class="center ngx-step--indicator" [ngClass]="icon"></i>
+    } @else {
+      <span class="center ngx-step--indicator">{{ step + 1 }}</span>
+    }
+    <i class="center ngx-step--complete-icon" [ngClass]="completeIcon"></i>
+  </div>
+</div>
+

@@ -1,0 +1,47 @@
+name: Build, Test, and Deploy
+
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # required for pushing to gh-pages
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 24.18.0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install Yarn
+        run: corepack prepare yarn@4.9.2 --activate
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build
+        run: |
+          yarn build
+        env:
+          CI: true
+
+      - name: Test
+        run: |
+          yarn test
+        env:
+          CI: true
+
+      - name: Prepare and deploy
+        run: |
+          npm run deploy -- --name="Swimlane" --email="swimlane-devops@swimlane.com" --no-silent
+        if: github.ref == 'refs/heads/master' && github.repository == 'swimlane/ngx-ui'
+        env:
+          CI: true
+          # Use repo token so push has write access (avoid fork or contributor PAT with no access)
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

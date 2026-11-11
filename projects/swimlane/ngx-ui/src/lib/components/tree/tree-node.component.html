@@ -1,0 +1,39 @@
+<li
+  class="ngx-tree-node"
+  [class.selectable]="selectable"
+  (focus)="activate.emit(this.data)"
+  (blur)="deactivate.emit(this.data)"
+  tabindex="-1"
+  >
+  @if (expandable) {
+    <span
+      class="ngx-expander"
+      (click)="onExpandClick($event)"
+      [class.disabled]="disabled"
+      [ngClass]="expanded ? icons.collapse : icons.expand"
+      >
+    </span>
+  }
+  @if (!template) {
+    <span [innerHTML]="label" [class.disabled]="disabled" class="ngx-node-label" (click)="onClick()">
+    </span>
+  }
+  @if (template) {
+    <ng-template [ngTemplateOutlet]="template" [ngTemplateOutletContext]="data"> </ng-template>
+  }
+  @if (expanded) {
+    <ng-content></ng-content>
+  }
+  @if (!virtualScrolling && children?.length && expandable && expanded) {
+    <ngx-tree
+      class="ngx-sub-tree"
+      [nodes]="children"
+      [template]="template"
+      [icons]="icons"
+      (selectNode)="selectNode.emit($event)"
+      (expand)="expand.emit($event)"
+      (collapse)="collapse.emit($event)"
+      >
+    </ngx-tree>
+  }
+</li>

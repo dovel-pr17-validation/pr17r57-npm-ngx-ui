@@ -1,0 +1,94 @@
+@use 'colors/colors' as colors;
+
+.ngx-checkbox {
+  display: flex;
+
+  &.disabled {
+    * {
+      cursor: not-allowed;
+    }
+  }
+
+  &.round {
+    .ngx-checkbox--box {
+      border-radius: 100% !important;
+    }
+  }
+
+  .ngx-checkbox--label {
+    display: flex;
+    cursor: pointer;
+    margin-bottom: 0;
+
+    input {
+      display: none;
+    }
+
+    .ngx-checkbox--box {
+      border-radius: 2px;
+      background-color: transparent;
+      border: 2px solid colors.$color-blue-grey-600;
+      transition: transform 0.4s cubic-bezier(0.45, 1.8, 0.5, 0.75);
+      user-select: none;
+      margin: auto 10px auto 0;
+      outline: 0px none colors.$color-blue-200;
+      outline-offset: 1px;
+
+      &:after {
+        position: absolute;
+        top: calc(50% - 7px);
+        left: calc(50% - 3px);
+        width: 6px;
+        height: 12px;
+        content: '';
+        border: solid colors.$color-white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(0deg) scale(0);
+        transition: all 0.4s cubic-bezier(0.45, 1.8, 0.5, 0.75);
+      }
+
+      &.indeterminate {
+        background-color: colors.$color-blue-400;
+        border-radius: 2px;
+        opacity: 1;
+        border: 2px solid colors.$color-blue-400;
+        transform: rotate(0deg) scale(1);
+
+        &:after {
+          width: 12px;
+          height: 2px;
+          top: calc(50% - 1px);
+          left: calc(50% - 6px);
+          border: none;
+          transform: rotate(0deg) scale(1);
+          background-color: colors.$color-white;
+        }
+      }
+
+      &.checked {
+        background-color: colors.$color-blue-400;
+        border-radius: 2px;
+        opacity: 1;
+        border: 2px solid colors.$color-blue-400;
+        transform: rotate(0deg) scale(1);
+        &:after {
+          transform: rotate(45deg) scale(1);
+          background-color: transparent;
+        }
+      }
+    }
+
+    .ngx-checkbox--content {
+      margin: auto 0;
+      color: colors.$color-blue-grey-100;
+    }
+
+    &:focus-visible {
+      outline: none;
+
+      .ngx-checkbox--box {
+        outline: 2px solid colors.$color-blue-200;
+      }
+    }
+  }
+}

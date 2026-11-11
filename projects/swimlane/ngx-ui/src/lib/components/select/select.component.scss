@@ -1,0 +1,805 @@
+@use 'sass:color';
+@use 'colors/colors' as colors;
+@use 'forms/variables' as forms;
+@forward '../input/input.component';
+
+// general
+$color-group-bg: #232837; //custom color for groupings that is 5% darker
+$color-dropdown-bg: var(--grey-700);
+$color-hover-bg: var(--grey-725);
+$color-placeholder-text: var(--grey-350);
+$color-caret-bg: var(--grey-350);
+
+// filter
+$color-filter-bg: var(--grey-600);
+$color-filter-text: var(--grey-050);
+$color-empty-text: var(--grey-150);
+
+// chips
+$color-chip-bg: var(--grey-600);
+$color-chip-text: #ffffff;
+
+.ngx-select {
+  @include forms.input-box;
+  min-width: forms.$input-min-width;
+
+  .ngx-select-flex-wrap {
+    flex-direction: row;
+    display: flex;
+
+    .ngx-select-flex-wrap-inner {
+      display: flex;
+      flex: 100%;
+      width: 100%;
+    }
+  }
+
+  .ngx-select-wrap {
+    position: relative;
+    display: block;
+    margin-bottom: var(--spacing-0);
+    width: 100%;
+
+    .ngx-select-hint {
+      @include forms.input-hint;
+    }
+  }
+
+  // Input
+  .ngx-select-input {
+    display: block;
+    position: relative;
+    margin-bottom: var(--spacing-0);
+    width: 100%;
+
+    .ngx-select-input-box-outer-wrap {
+      align-items: center;
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+    }
+
+    .ngx-select-input-box {
+      align-items: center;
+      position: relative;
+      background: transparent;
+      outline: none;
+      margin-bottom: var(--spacing-0);
+      padding-left: var(--spacing-0);
+      width: 100%;
+      min-height: var(--input-height);
+      min-width: 60px;
+      cursor: pointer;
+      display: flex;
+      vertical-align: bottom;
+    }
+
+    .ngx-select-input-underline {
+      @include forms.input-underline;
+    }
+
+    &:focus-within,
+    .ngx-select-input-box:focus {
+      .underline-fill {
+        width: 100%;
+      }
+    }
+
+    .ngx-select-input-list {
+      padding: var(--spacing-0);
+      color: forms.$color-input-text;
+      min-height: 1.4em;
+      max-width: 100%;
+    }
+
+    &--has-controls .ngx-select-input-list {
+      padding: var(--spacing-0) 10px var(--spacing-0) var(--spacing-0);
+    }
+
+    .ngx-select-label {
+      @include forms.input-label;
+    }
+
+    .ngx-select-placeholder {
+      position: absolute;
+      display: block;
+      cursor: pointer;
+      color: $color-placeholder-text;
+      overflow-x: clip;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      padding-right: var(--spacing-24); // room for caret
+    }
+
+    .ngx-select-input-box__controls {
+      color: $color-caret-bg;
+      display: flex;
+      flex-wrap: nowrap;
+      min-height: var(--input-height);
+      padding-right: var(--spacing-4);
+
+      button {
+        padding: var(--spacing-0) var(--spacing-2);
+        cursor: pointer;
+        min-height: 1em;
+
+        &:hover {
+          color: var(--blue-400);
+        }
+      }
+
+      .ngx-select-clear,
+      .ngx-select-caret {
+        align-items: center;
+        display: flex;
+        font-size: var(--font-size-xxs);
+      }
+
+      .ngx-select-clear {
+        margin-right: var(--spacing-4);
+      }
+
+      .ngx-select-caret {
+        transition: transform 200ms ease-in-out;
+        transform: rotate(0deg) translateY(0);
+      }
+    }
+  }
+
+  .ngx-select-input-option {
+    // Specific style for links in tagging options
+    > a {
+      color: var(--grey-050);
+
+      > .ngx-icon {
+        color: var(--grey-200);
+        font-size: 0.55em;
+      }
+      &:hover {
+        color: #fff;
+        > .ngx-icon {
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  // multi-select
+  &.tagging-selection,
+  &.multi-selection {
+    .ngx-select-input-option {
+      background: $color-chip-bg;
+      color: $color-chip-text;
+      border-radius: var(--radius-2);
+      margin: 3px;
+      white-space: nowrap;
+      overflow: visible;
+      text-overflow: ellipsis;
+      cursor: text;
+      transition: background 100ms ease-in;
+      position: relative;
+      top: 0;
+      padding: var(--spacing-0) 0.5em;
+      font-size: var(--font-size-m);
+      line-height: 1.4em;
+      max-width: 300px;
+      display: inline-flex;
+      align-items: baseline;
+      gap: var(--spacing-4);
+
+      > * {
+        flex: 0 1 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-shadow: 2px 4px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      .ngx-select-clear {
+        padding: var(--spacing-0) var(--spacing-0) var(--spacing-0) var(--spacing-2);
+        cursor: pointer;
+        font-size: 0.5em;
+        color: $color-caret-bg;
+        line-height: var(--font-line-height-100);
+        height: 1em;
+        z-index: 500;
+        top: -1px;
+        text-shadow: none;
+        flex: 0 0 auto;
+
+        &:hover {
+          background: var(--grey-750);
+        }
+      }
+
+      &.disabled {
+        padding-right: var(--spacing-10);
+      }
+    }
+  }
+
+  // tagging
+  &.tagging-selection {
+    .ngx-select-input {
+      .ngx-select-input-box {
+        cursor: text;
+        flex: 1;
+      }
+
+      .ngx-select-input-box-wrapper {
+        .ngx-select-text-box {
+          background-color: transparent;
+          border: none;
+          outline: none;
+          -webkit-appearance: none;
+          appearance: none;
+          color: forms.$color-input-text;
+          line-height: var(--font-line-height-100);
+          display: inline-block;
+          font-size: var(--font-size-m);
+          vertical-align: bottom;
+          padding: var(--spacing-0);
+          margin: var(--spacing-4);
+
+          &::-webkit-search-decoration,
+          &::-webkit-search-cancel-button,
+          &::-webkit-search-results-button,
+          &::-webkit-search-results-decoration {
+            -webkit-appearance: none !important;
+          }
+
+          &:focus {
+            outline: none;
+          }
+        }
+      }
+
+      .ngx-select-clear-tagging-input {
+        padding: var(--spacing-0) var(--spacing-0) var(--spacing-0) var(--spacing-2);
+        cursor: pointer;
+        font-size: 0.5em;
+        color: $color-caret-bg;
+        line-height: 0.5em;
+        height: 0.5em;
+        z-index: 500;
+        top: -1px;
+        &:hover {
+          color: var(--blue-400);
+        }
+      }
+    }
+
+    &:not(.active) .ngx-select-input-list.no-selections {
+      position: absolute;
+      bottom: 0;
+    }
+
+    &.active .ngx-select-placeholder {
+      display: none;
+    }
+  }
+
+  &.tagging-selection {
+    .ngx-select-input {
+      .ngx-select-input-option {
+        .ngx-select-clear {
+          align-self: center;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          top: 0;
+          height: auto;
+          line-height: 1;
+          padding: var(--spacing-0);
+        }
+
+        &.ngx-select-input-option--editing {
+          max-width: 100%;
+          overflow: visible;
+          flex: 0 0 auto;
+          width: max-content;
+          box-shadow: none;
+        }
+
+        .ngx-select-chip-edit {
+          background: transparent;
+          border: none;
+          outline: none;
+          appearance: none;
+          color: inherit;
+          flex: 0 0 auto;
+          font: inherit;
+          line-height: 1.4em;
+          margin: 0;
+          min-width: 1ch;
+          padding: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: clip;
+          text-shadow: none;
+          box-sizing: content-box;
+
+          &:focus {
+            outline: none;
+          }
+        }
+      }
+    }
+  }
+
+  &.inline-tagging-selection {
+    &.tagging-selection .ngx-select-input-option {
+      align-items: center;
+      margin: 0;
+    }
+
+    .ngx-select-input {
+      .ngx-select-input-list.horizontal-list {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-8);
+        max-height: 12rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: 100%;
+      }
+
+      .ngx-select-input-option {
+        max-width: min(100%, 18rem);
+        overflow: hidden;
+        align-items: center;
+
+        .ngx-select-input-name {
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+
+        &.ngx-select-input-option--invalid {
+          box-shadow: inset 0 0 0 1px var(--red-500);
+        }
+
+        &.ngx-select-input-option--editing {
+          background: $color-chip-bg;
+        }
+      }
+
+      .ngx-select-input-box-wrapper {
+        flex: 1 1 8rem;
+        min-width: 4rem;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: var(--spacing-0);
+        margin: var(--spacing-0);
+        align-self: center;
+
+        &--caret {
+          flex: 0 0 auto;
+          width: auto;
+          min-width: 0;
+          margin-right: calc(-0.5 * var(--spacing-5));
+        }
+
+        textarea.ngx-select-text-box {
+          display: block;
+          font-family: inherit;
+          font-size: var(--font-size-m);
+          margin: var(--spacing-0);
+          padding: var(--spacing-0);
+          line-height: 1.4em;
+          min-height: 1.4em;
+          min-width: 0;
+          width: 100%;
+          max-width: 100%;
+          resize: none;
+          overflow: hidden;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          white-space: pre-wrap;
+          box-sizing: border-box;
+          vertical-align: middle;
+        }
+
+        &--caret textarea.ngx-select-text-box {
+          width: 1px;
+          min-width: 1px;
+          height: 1.4em;
+          min-height: 1.4em;
+          white-space: nowrap;
+          overflow: hidden;
+          resize: none;
+        }
+      }
+    }
+
+    &.fill {
+      .ngx-select-input {
+        .ngx-select-input-list.horizontal-list {
+          padding-left: var(--spacing-10);
+          padding-right: var(--spacing-4);
+        }
+
+        .ngx-select-input-box {
+          min-height: var(--input-height);
+        }
+      }
+    }
+  }
+
+  // single-select
+  &.single-selection {
+    .ngx-select-input {
+      .ngx-select-input-list {
+        // padding-top: 3px;
+
+        .ngx-select-input-option {
+          width: 100%;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          display: block;
+          color: forms.$color-input-text;
+          overflow-x: hidden;
+          overflow-y: visible;
+        }
+      }
+    }
+  }
+
+  // dropdown active
+  &.active {
+    .ngx-select-input {
+      .ngx-select-input-underline {
+        .underline-fill {
+          width: 100%;
+        }
+      }
+
+      .ngx-select-caret {
+        transition: transform 200ms ease-in-out;
+        transform: rotate(180deg) translateY(10%);
+      }
+    }
+
+    .ngx-select-dropdown--upwards {
+      opacity: 1;
+      bottom: 100%;
+      top: auto;
+      margin-bottom: var(--spacing-24);
+      animation: openUpwardsAnimation 0.25s;
+    }
+
+    .ngx-select-dropdown--downwards {
+      opacity: 1;
+      animation: openAnimation 0.25s;
+    }
+
+    .ngx-select-dropdown {
+      display: block;
+    }
+  }
+
+  &.disabled {
+    .ngx-select-input {
+      .ngx-select-input-box {
+        cursor: not-allowed;
+      }
+    }
+
+    .underline-fill {
+      width: 0 !important;
+    }
+  }
+
+  // Dropdown
+  .ngx-select-dropdown {
+    position: absolute;
+    clear: left;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    background: $color-dropdown-bg;
+    border: 1px solid transparent;
+    border-radius: var(--radius-6);
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    margin-top: -1em;
+    opacity: 0;
+    display: none;
+    transition:
+      visibility 0s,
+      opacity 0.25s ease-out;
+
+    li {
+      max-width: 100%;
+      white-space: nowrap;
+      position: relative;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid var(--grey-650);
+      }
+
+      .ngx-check {
+        display: none;
+      }
+    }
+
+    .ngx-select-dropdown-options {
+      max-height: 300px;
+      overflow-y: auto;
+
+      .ngx-select-dropdown-option {
+        padding: 7px 35px 7px 15px;
+        font-size: var(--font-size-m);
+        overflow-x: hidden;
+        overflow-y: visible;
+        text-overflow: ellipsis;
+
+        &:first-child {
+          border-top-left-radius: var(--radius-6);
+          border-top-right-radius: var(--radius-6);
+        }
+
+        &:last-child {
+          border-bottom-left-radius: var(--radius-6);
+          border-bottom-right-radius: var(--radius-6);
+        }
+
+        .ngx-select-dropdown-selector {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-4);
+        }
+
+        &.disabled {
+          color: var(--grey-450);
+          opacity: 1;
+        }
+
+        &:not(.disabled) {
+          cursor: pointer;
+
+          &:not(.selected) {
+            &.active {
+              background: $color-hover-bg;
+            }
+            &:hover {
+              background: var(--grey-750);
+            }
+          }
+        }
+
+        &.selected {
+          &:not(.multiple):not(.tagging):not(.disabled) {
+            background: var(--blue-600);
+          }
+          color: var(--white);
+
+          &:not(.disabled) {
+            &:hover {
+              background: var(--grey-750);
+            }
+          }
+        }
+      }
+    }
+
+    &.groupings {
+      .ngx-select-option-group {
+        .ngx-select-option-group-name {
+          padding: 7px 15px;
+          font-size: var(--font-size-m);
+          display: block;
+          font-weight: var(--font-weight-semibold);
+          line-height: var(--font-line-height-300);
+          color: var(--grey-300);
+          overflow-x: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .ngx-select-dropdown-options {
+        .ngx-select-dropdown-option {
+          padding: 7px 35px 7px 25px;
+        }
+      }
+
+      // Remove border radius from selected items that are in nested option groups
+      .ngx-select-option-group .ngx-select-dropdown-options .ngx-select-dropdown-option.selected:first-child,
+      .ngx-select-option-group .ngx-select-dropdown-options .ngx-select-dropdown-option:first-child:hover {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+      }
+      .ngx-select-option-group .ngx-select-dropdown-options .ngx-select-dropdown-option.selected:last-child,
+      .ngx-select-option-group .ngx-select-dropdown-options .ngx-select-dropdown-option:last-child:hover {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+      .ngx-select-option-group:last-child .ngx-select-dropdown-options .ngx-select-dropdown-option.selected:last-child,
+      .ngx-select-option-group:last-child .ngx-select-dropdown-options .ngx-select-dropdown-option:last-child:hover {
+        border-bottom-left-radius: var(--radius-6);
+        border-bottom-right-radius: var(--radius-6);
+      }
+    }
+
+    .ngx-select-filter {
+      padding: var(--spacing-10);
+      background: $color-filter-bg;
+      position: relative;
+      border-top-left-radius: var(--radius-6);
+      border-top-right-radius: var(--radius-6);
+
+      .ngx-search,
+      .ngx-x {
+        position: absolute;
+        top: 50%;
+        color: var(--grey-350);
+      }
+
+      .ngx-search {
+        left: 10px;
+        font-size: var(--font-size-xs);
+        margin-top: -6px;
+      }
+
+      .ngx-x {
+        right: 11px;
+        font-size: 0.5625rem;
+        margin-top: -4.5px;
+        cursor: pointer;
+
+        &:hover {
+          color: var(--grey-300);
+        }
+      }
+
+      .ngx-select-filter-input {
+        color: $color-filter-text;
+        background: transparent;
+        border: none;
+        outline: none;
+        display: block;
+        font-size: var(--font-size-m);
+        width: 100%;
+        padding-left: var(--spacing-20);
+
+        &::-webkit-search-decoration,
+        &::-webkit-search-cancel-button,
+        &::-webkit-search-results-button,
+        &::-webkit-search-results-decoration {
+          -webkit-appearance: none;
+        }
+
+        &::placeholder {
+          color: var(--grey-350);
+        }
+      }
+
+      // Remove border radius from selected items that are in nested option groups
+      & + .ngx-select-dropdown-options .ngx-select-dropdown-option.selected:first-child,
+      & + .ngx-select-dropdown-options .ngx-select-dropdown-option:first-child:hover {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+      }
+    }
+
+    .ngx-select-empty-placeholder {
+      color: $color-empty-text;
+      padding: 7px 15px;
+      font-size: var(--font-size-m);
+      font-style: italic;
+
+      .ngx-select-empty-placeholder-add {
+        font-style: normal;
+        float: right;
+      }
+
+      .ngx-select-add-current-value {
+        font-style: normal;
+        span {
+          text-align: right;
+          display: block;
+        }
+      }
+    }
+  }
+
+  // Validation
+  &.ng-invalid.ng-touched,
+  &.ng-invalid.ng-dirty,
+  &.invalid {
+    .ngx-select-label {
+      font-weight: var(--font-weight-semibold);
+      color: var(--red-500);
+    }
+
+    .ngx-select-caret,
+    .ngx-select-hint {
+      color: var(--red-500);
+    }
+
+    .ngx-select-input-underline {
+      background-color: var(--red-500);
+    }
+  }
+
+  &.fill {
+    &.single-selection .ngx-select-input-list {
+      padding-left: var(--spacing-10);
+    }
+
+    .ngx-select-flex-wrap {
+      .ngx-select-input-box-outer-wrap {
+        @include forms.input-fill-background;
+      }
+
+      .ngx-select-input-box {
+        min-height: var(--input-height);
+        color: var(--grey-050);
+      }
+    }
+
+    .ngx-select-placeholder {
+      padding-left: var(--spacing-10);
+    }
+  }
+
+  &.active:not(.ng-invalid):not(.disabled),
+  &:focus-within:not(.ng-invalid):not(.disabled) {
+    .ngx-select-label,
+    .ngx-select-caret,
+    &.single-selection .ngx-select-clear {
+      color: forms.$input-label-color-active;
+
+      &:hover {
+        color: var(--blue-400);
+      }
+    }
+  }
+
+  @keyframes openAnimation {
+    0% {
+      transform: translateY(-25px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  @keyframes openUpwardsAnimation {
+    0% {
+      transform: translateY(25px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  &.autosize {
+    .ngx-select-dropdown {
+      width: fit-content;
+      min-width: 190px;
+      max-width: 100%;
+    }
+
+    .ngx-select-flex-wrap {
+      max-width: 100%;
+      width: fit-content;
+    }
+
+    .ngx-select-input .ngx-select-label {
+      padding-right: var(--spacing-24); // space for the caret
+    }
+  }
+
+  &.active-selections,
+  &.has-placeholder,
+  &.active,
+  &.fill {
+    .ngx-select-input .ngx-select-label {
+      font-size: forms.$input-label-font-size-active;
+      top: -1.4em;
+      padding-right: var(--spacing-0);
+    }
+  }
+}

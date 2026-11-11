@@ -1,0 +1,227 @@
+@use 'colors/colors' as colors;
+@use 'colors/shadow-variables' as shadows;
+/**
+ * Button styling
+ */
+
+$button-text-color: var(--white);
+$button-fill-color: var(--grey-600);
+$button-fill-active-color: var(--grey-700);
+
+button {
+  box-sizing: border-box;
+  color: inherit;
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  font: inherit;
+  background: transparent;
+  border: none;
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.07);
+
+  &:active,
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible,
+  &.focus-visible {
+    outline: -webkit-focus-ring-color auto 1px;
+  }
+}
+
+.btn {
+  box-sizing: border-box;
+  color: $button-text-color;
+  display: inline-block;
+  padding: 0.35em 0.55em;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  font: inherit;
+  font-size: var(--font-size-m);
+  font-weight: var(--font-weight-bold);
+  outline: none;
+  line-height: var(--font-line-height-100);
+  outline-offset: 1px;
+
+  background: $button-fill-color;
+  border: solid 1px transparent;
+  border-radius: var(--radius-4);
+  box-shadow: shadows.$shadow-1;
+  transition:
+    background-color 200ms,
+    box-shadow 200ms;
+
+  .ngx-icon,
+  .icon {
+    font-weight: var(--font-weight-regular);
+    vertical-align: middle;
+    line-height: var(--font-line-height-100);
+    font-size: var(--font-size-m);
+
+    &:before {
+      font-weight: inherit;
+    }
+
+    &.has-text,
+    &.has-text-right {
+      margin-right: 0.2em;
+    }
+
+    &.has-text-left {
+      margin-left: 0.2em;
+    }
+  }
+
+  &::-moz-focus-inner {
+    border: 0;
+    padding: var(--spacing-0);
+  }
+
+  &:focus,
+  &:focus-within {
+    outline: none;
+  }
+
+  // Focus ring
+  &:focus-visible,
+  &.focus-visible {
+    outline: 2px solid $button-fill-color;
+  }
+
+  &:hover:not([disabled]),
+  &:hover:not(.disabled),
+  &.focus-hover:not([disabled]),
+  &.focus-hover:not(.disabled) {
+    cursor: pointer;
+    background: $button-fill-active-color;
+    outline-color: $button-fill-active-color;
+
+    &.btn-primary {
+      background-color: var(--blue-500);
+    }
+
+    &.btn-warning {
+      background-color: var(--orange-500);
+    }
+
+    &.btn-danger {
+      background-color: var(--red-500);
+    }
+    &.btn-link {
+      background-color: transparent;
+    }
+
+    &.btn-bordered {
+      border-color: var(--blue-200);
+      color: var(--blue-200);
+    }
+  }
+
+  &:hover,
+  &:focus,
+  &:active {
+    text-decoration: none;
+  }
+
+  // sizes
+  &.small {
+    font-size: var(--font-size-xxs);
+  }
+
+  &.large {
+    font-size: 1.3em;
+  }
+
+  &.btn-primary {
+    background-color: var(--blue-400);
+    outline-color: var(--blue-500);
+
+    &.btn-primary-gradient {
+      background-color: var(--blue-600);
+      background: linear-gradient(350.57deg, var(--blue-600) 14.42%, var(--lightblue-600) 100%);
+      box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5);
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--blue-600);
+    }
+  }
+
+  &.btn-warning {
+    background-color: var(--orange-400);
+    color: var(--grey-900);
+    outline-color: var(--orange-500);
+  }
+
+  &.btn-danger {
+    background-color: var(--red-400);
+    outline-color: var(--red-400);
+  }
+
+  &.btn-link {
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  &.btn-bordered,
+  &.btn-primary.btn-bordered {
+    border: 1px solid var(--blue-400);
+    color: var(--blue-400);
+    background-color: transparent;
+    box-shadow: none;
+    outline-color: var(--blue-400);
+
+    &.disabled-button {
+      opacity: 0.5;
+
+      .button {
+        opacity: 1;
+      }
+    }
+  }
+
+  &.btn-default.btn-bordered {
+    border: 1px solid $button-text-color;
+    color: $button-text-color;
+    background-color: transparent;
+    box-shadow: none;
+
+    &:hover {
+      border-color: var(--blue-500) !important;
+      color: var(--blue-500) !important;
+    }
+
+    &.disabled-button {
+      opacity: 0.5;
+
+      .button {
+        opacity: 1;
+      }
+    }
+  }
+
+  &.btn-file {
+    cursor: pointer;
+    padding: var(--spacing-0);
+
+    label {
+      display: block;
+      cursor: pointer;
+      padding: 0.35em 0.75em;
+    }
+
+    &[disabled] label {
+      cursor: not-allowed;
+    }
+
+    input[type='file'] {
+      pointer-events: none;
+      position: absolute;
+      left: -9999px;
+    }
+  }
+}

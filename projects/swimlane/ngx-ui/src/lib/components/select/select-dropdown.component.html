@@ -1,0 +1,114 @@
+<div inViewport>
+  @if (filterable && !tagging) {
+  <div class="ngx-select-filter">
+    <i class="ngx-icon ngx-search"></i>
+    <input
+      #filterInput
+      type="search"
+      tabindex=""
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="off"
+      class="ngx-select-filter-input"
+      [placeholder]="filterPlaceholder"
+      (keyup)="onInputKeyUp($event)"
+      (keydown.shift.Enter)="onShiftEnterKeyDown($event)"
+      (keydown.tab)="onTabKeyDown($event)"
+      (change)="$event.stopPropagation()"
+    />
+    <i [hidden]="!filterInput.value" class="ngx-icon ngx-x" (click)="clearFilter(filterInput)"></i>
+  </div>
+  }
+  <ul class="vertical-list ngx-select-dropdown-options" role="listbox">
+    @if (showSelectAll && hasAvailableOptions) {
+    <li class="ngx-select-dropdown-option ngx-select-all-option" (click)="selectAll.emit()">
+      <span>Select All</span>
+    </li>
+    } @for (group of groups; track group.name; let i = $index; let first = $first; let last = $last; let odd = $odd; let
+    even = $even) {
+    <li class="ngx-select-option-group">
+      @if (group.name) { @if (groupByTemplate) {
+      <span class="ngx-select-option-group-name">
+        <ng-container
+          *ngTemplateOutlet="
+            groupByTemplate;
+            context: { groupName: group.name, index: i, first: first, last: last, odd: odd, even: even }
+          "
+        ></ng-container>
+      </span>
+      } @else {
+      <span class="ngx-select-option-group-name" [innerHTML]="group.name"> </span>
+      } }
+      <ul class="vertical-list ngx-select-dropdown-options">
+        @for (kv of group.options; track kv.option) {
+        <li
+          class="ngx-select-dropdown-option"
+          [class.disabled]="kv.option.disabled"
+          [class.active]="kv.index === focusIndex"
+          [class.selected]="isSelected(kv.option)"
+          [class.multiple]="multiple"
+          [class.tagging]="tagging"
+          [hidden]="kv.option.hidden"
+          [attr.data-value]="kv.option.value"
+          ngx-tooltip
+          [tooltipAlignment]="$safeNavigationMigration(kv.option.tooltipConfig?.tooltipAlignment)"
+          [tooltipContext]="$safeNavigationMigration(kv.option.tooltipConfig?.tooltipContext)"
+          [tooltipCssClass]="$safeNavigationMigration(kv.option.tooltipConfig?.tooltipCssClass)"
+          [tooltipDisabled]="kv.option.tooltipConfig?.tooltipDisabled || !kv.option.tooltipConfig?.tooltipTitle"
+          [tooltipPlacement]="$safeNavigationMigration(kv.option.tooltipConfig?.tooltipPlacement)"
+          [tooltipShowEvent]="$safeNavigationMigration(kv.option.tooltipConfig?.tooltipShowEvent)"
+          [tooltipShowTimeout]="$safeNavigationMigration(kv.option.tooltipConfig?.tooltipShowTimeout)"
+          [tooltipTemplate]="$safeNavigationMigration(kv.option.tooltipConfig?.tooltipTemplate)"
+          [tooltipTitle]="$safeNavigationMigration(kv.option.tooltipConfig?.tooltipTitle)"
+          [tooltipType]="$safeNavigationMigration(kv.option.tooltipConfig?.tooltipType)"
+          tabindex="-1"
+          (click)="onOptionClick(kv.option)"
+          (keydown)="onOptionKeyDown($event, kv.option)"
+        >
+          @if (kv.option.optionTemplate) {
+          <ng-template [ngTemplateOutlet]="kv.option.optionTemplate" [ngTemplateOutletContext]="{ option: kv.option }">
+          </ng-template>
+          } @if (!kv.option.optionTemplate) {
+          <div class="ngx-select-dropdown-selector">
+            @if (multiple) {
+            <ngx-checkbox
+              (click)="onCheckboxClick($event, kv.option)"
+              [checked]="isSelected(kv.option)"
+              [disabled]="kv.option.disabled"
+            ></ngx-checkbox>
+            }
+            <span [innerHTML]="kv.option.name"> </span>
+          </div>
+          }
+        </li>
+        } @if (allowAdditions && filterQuery && group.options?.length && !filterQueryIsInOptions) {
+        <li class="ngx-select-empty-placeholder">
+          <a href="#" class="ngx-select-add-current-value" (click)="onAddClicked($event, filterQuery)">
+            @if (isNotTemplate) {
+            <span [innerHTML]="allowAdditionsText"> </span>
+            } @else {
+            <ng-container *ngTemplateOutlet="allowAdditionsText"></ng-container>
+            }
+          </a>
+        </li>
+        } @if (filterQuery && filterEmptyPlaceholder && !group.options?.length) {
+        <li class="ngx-select-empty-placeholder">
+          <span class="ngx-select-empty-placeholder-text" [innerHTML]="filterEmptyPlaceholder"> </span>
+          @if (allowAdditions) {
+          <a href="#" class="ngx-select-empty-placeholder-add" (click)="onAddClicked($event, filterQuery)">
+            @if (isNotTemplate) {
+            <span [innerHTML]="allowAdditionsText"> </span>
+            } @else {
+            <ng-container *ngTemplateOutlet="allowAdditionsText"></ng-container>
+            }
+          </a>
+          }
+        </li>
+        } @if (!filterQuery && emptyPlaceholder && !group.options?.length) {
+        <li class="ngx-select-empty-placeholder" [innerHTML]="emptyPlaceholder"></li>
+        }
+      </ul>
+    </li>
+    }
+  </ul>
+</div>

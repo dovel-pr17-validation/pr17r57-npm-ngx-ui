@@ -1,0 +1,38 @@
+<div class="ngx-json-editor-flat">
+  <ngx-json-editor-node-flat
+    [(model)]="model"
+    [schema]="schema"
+    [hideRoot]="hideRoot"
+    [schemaRef]="schemaRef"
+    (modelChange)="modelChangedCallback($event)"
+    [errors]="errors"
+    [typeCheckOverrides]="typeCheckOverrides"
+    [label]="label"
+    [formats]="customFormats"
+    [schemaBuilderMode]="schemaBuilderMode"
+    [showKnownProperties]="showKnownProperties"
+    [passwordToggleEnabled]="passwordToggleEnabled"
+    [inputControlTemplate]="inputControlTemplate"
+    (schemaUpdate)="schemaUpdate.emit($event)"
+    >
+    <div class="node-options" node-options>
+      @if (schemaBuilderMode) {
+        <button type="button" class="node-options-btn" (click)="onPropertyConfig()">
+          <i class="ngx-icon ngx-cog"></i>
+        </button>
+      }
+    </div>
+  </ngx-json-editor-node-flat>
+</div>
+
+<!-- Property Config Dialog -->
+<ng-template #propertyConfigTmpl let-context="context">
+  <ngx-property-config
+    [property]="context.property"
+    [schema]="context.schema"
+    [formats]="context.formats"
+    [rootItem]="true"
+    (updateProperty)="context.apply($event)"
+    >
+  </ngx-property-config>
+</ng-template>

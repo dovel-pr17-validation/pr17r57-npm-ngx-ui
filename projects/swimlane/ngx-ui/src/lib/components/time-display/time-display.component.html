@@ -1,0 +1,44 @@
+<time
+  ngx-tooltip
+  class="ngx-time__container"
+  [attr.datetime]="utcDatetime"
+  [tooltipDisabled]="tooltipDisabled || !hasPopup"
+  [tooltipTemplate]="tooltipTemplate || defaultTooltipTemplate"
+  [tooltipCssClass]="tooltipCssClass"
+  [tooltipPlacement]="tooltipPlacement"
+  [tooltipShowTimeout]="400"
+  [attr.title]="tooltipDisabled && hasPopup ? titleValue : null"
+  >
+  @if (!dateInvalid) {
+    @switch (mode) {
+      @case (DATE_DISPLAY_TYPES.HUMAN) {
+        {{ internalDatetime | amTimeAgo }}
+      }
+      @case (DATE_DISPLAY_TYPES.TIMEZONE) {
+        {{ internalDatetime | amTimeZoneFormat: timezone:format }}
+      }
+      @case (DATE_DISPLAY_TYPES.CUSTOM) {
+        {{
+        datetime | amTimeZoneFormat: timezone:format
+        }}
+      }
+      @case (DATE_DISPLAY_TYPES.LOCAL) {
+        {{
+        internalDatetime | amTimeZoneFormat: timezone:format
+        }}
+      }
+    }
+  }
+  @if (dateInvalid) {
+    {{ invalidDateMessage }} "{{ datetime }}"
+  }
+</time>
+
+<ng-template #defaultTooltipTemplate>
+  @for (item of timeValues | keyvalue; track item) {
+    <div class="date-zone-display">
+      <span>{{ item.value.display }}</span>
+      <button class="btn small" (click)="onClick(item)"><ngx-icon fontIcon="copy"></ngx-icon> {{ item.key }}</button>
+    </div>
+  }
+</ng-template>

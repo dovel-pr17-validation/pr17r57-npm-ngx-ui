@@ -1,0 +1,86 @@
+@use 'colors/colors' as colors;
+
+.ngx-large-format-dialog-header-title {
+  --title-font-size: 1.75rem;
+  --title-font-line-height: 2rem;
+}
+
+.ngx-medium-format-dialog-header-title {
+  --title-font-size: 1.375rem;
+  --title-font-line-height: 1.625rem;
+}
+
+.ngx-medium-format-dialog-header-title,
+.ngx-large-format-dialog-header-title {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  flex: 1;
+  max-width: 50%;
+  height: 100%;
+  justify-content: flex-start;
+  align-items: center;
+
+  &__clear,
+  &__img {
+    height: 60px;
+    width: 60px;
+  }
+
+  &__img {
+    background-color: white;
+
+    &__default-background {
+      background-color: transparent;
+    }
+  }
+
+  &__clear {
+    background-color: transparent;
+  }
+
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 0 0 20%;
+    height: 100%;
+    justify-content: center;
+  }
+
+  &__text-wrapper {
+    display: flex;
+
+    &--title {
+      align-items: flex-end;
+    }
+
+    &--title-center {
+      align-items: center;
+    }
+
+    h1,
+    h4 {
+      margin: 0;
+
+      /**
+      truncate
+       */
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    h1 {
+      color: var(--white);
+      font-size: var(--title-font-size, 1.75rem);
+      line-height: var(--title-font-line-height, 2rem);
+    }
+
+    h4 {
+      color: var(--grey-250);
+      font-size: var(--font-size-m);
+      line-height: 0.75rem;
+    }
+  }
+}

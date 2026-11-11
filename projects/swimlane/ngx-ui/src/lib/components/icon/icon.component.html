@@ -1,0 +1,11 @@
+@if (!cssClasses || cssClasses.length === 0) {
+  <ng-content></ng-content>
+} @else if (cssClasses.length === 1) {
+  <i [ngClass]="cssClasses[0]"></i>
+} @else {
+  <span class="icon-fx-stacked">
+    @for (cssClass of cssClasses; track $index) {
+      <i [ngClass]="cssClass"></i>
+    }
+  </span>
+}

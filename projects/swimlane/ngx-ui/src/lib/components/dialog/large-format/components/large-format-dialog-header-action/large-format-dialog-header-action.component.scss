@@ -1,0 +1,25 @@
+@use 'colors/colors' as colors;
+
+.ngx-large-format-dialog-header-action {
+  flex: 0 0 20%;
+  max-width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  &__button {
+    color: colors.$color-blue-grey-400;
+    font-size: 0.8125rem;
+    line-height: 1rem;
+    padding-right: 0;
+
+    & i.ngx-icon {
+      font-size: 0.625rem;
+      margin-right: 0.5rem;
+    }
+
+    &:hover {
+      color: colors.$color-white;
+    }
+  }
+}

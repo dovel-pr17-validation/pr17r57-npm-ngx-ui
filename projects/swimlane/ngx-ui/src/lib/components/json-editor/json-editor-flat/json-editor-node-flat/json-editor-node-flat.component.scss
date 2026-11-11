@@ -1,0 +1,171 @@
+@use 'colors/colors' as colors;
+@use '../../json-editor.extensions';
+
+.code-editor .ngx-select .ngx-select-input .ngx-select-input-box__controls {
+  .ngx-select-caret,
+  .ngx-select-clear {
+    display: none;
+  }
+}
+.json-editor--popover-template {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xs);
+  line-height: 13px;
+  max-width: 300px;
+  color: var(--grey-800);
+
+  .label {
+    color: var(--grey-550);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+  }
+
+  .separator {
+    height: 8px;
+    background: transparent;
+  }
+}
+
+ngx-json-editor-node-flat {
+  max-width: 100%;
+}
+
+.json-tree-node-flat {
+  .indentation {
+    @extend %indentation;
+    flex: 1 0 15px;
+  }
+
+  .node-container {
+    display: flex;
+    padding-bottom: var(--spacing-0);
+  }
+
+  .node {
+    background-color: var(--grey-700);
+    box-shadow: 0px 2px 7px rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-2);
+    display: flex;
+    padding: var(--spacing-24) 10px;
+    position: relative;
+    flex: 0 1 100%;
+    height: 96px;
+    min-width: 0; // https://css-tricks.com/flexbox-truncated-text/#the-solution-is-min-width-0-on-the-flex-child
+
+    .error-box {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-2);
+      top: 0;
+      left: 0;
+      border: 2px solid var(--color-error);
+    }
+
+    .left-options {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-right: var(--spacing-10);
+      color: var(--grey-400);
+      flex: 0 0 15px;
+
+      .required-indicator {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+
+        span {
+          display: flex;
+
+          svg path {
+            fill: var(--grey-400);
+            stroke: var(--grey-400);
+          }
+
+          &.not-required {
+            svg path {
+              fill: transparent;
+            }
+          }
+
+          &.invalid {
+            svg path {
+              fill: var(--color-error);
+              stroke: var(--color-error);
+            }
+          }
+        }
+      }
+
+      .drag-drop-handle {
+        cursor: grab;
+      }
+    }
+
+    .node-content {
+      display: flex;
+      justify-content: space-between;
+      flex: 0 0 100%;
+      align-items: center;
+      min-width: 0;
+
+      &.extra-margin {
+        margin-top: -15px;
+      }
+
+      .node-info {
+        flex: 0 0 40%;
+        padding-right: var(--spacing-24);
+        overflow: hidden;
+        padding-top: 3px;
+      }
+
+      .node-input {
+        flex: 0 1 60%;
+
+        ngx-input {
+          padding: var(--spacing-0);
+
+          .ngx-input-hint {
+            min-height: 0;
+          }
+        }
+
+        ngx-select {
+          margin-top: var(--spacing-36);
+        }
+
+        .code {
+          &:hover {
+            button {
+              display: inline;
+            }
+          }
+
+          input {
+            color: var(--grey-100);
+          }
+
+          button {
+            display: none;
+            color: var(--grey-400);
+          }
+        }
+
+        .input-error {
+          color: var(--color-error);
+          min-height: 1.2em; // min height keeps input from shifting when error is shown
+          text-transform: capitalize;
+          font-size: var(--font-size-xs);
+          font-family:
+            Source Sans Pro,
+            Open Sans,
+            Arial,
+            sans-serif;
+        }
+      }
+    }
+  }
+}

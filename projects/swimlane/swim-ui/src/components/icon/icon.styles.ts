@@ -1,0 +1,138 @@
+import { css, unsafeCSS } from 'lit';
+import { SWIM_ICON_FONT_FAMILY } from './icon-font-loader';
+import { iconFontGlyphs } from './icon-font-glyphs';
+
+/** Quoted font-family value for Lit static styles (constant only). */
+const swimIconFontFamily = unsafeCSS(`'${SWIM_ICON_FONT_FAMILY}'`);
+
+/**
+ * Icon styles matching @swimlane/ngx-ui design system.
+ * BEM: swim-icon (block), swim-icon__i, swim-icon__stack (elements).
+ *
+ * Font family SWIM_ICON_FONT_FAMILY; @font-face is injected by icon-font-face when the icon module loads.
+ */
+export const iconStyles = css`
+  :host {
+    /* inline-flex keeps the host box tight to the glyph and centers the shadow icon in contexts
+       (e.g. swim-button) where inherited line-height would otherwise grow the line box asymmetrically */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 1;
+  }
+
+  :host svg {
+    fill: currentColor;
+    display: block;
+    width: 1em;
+    height: 1em;
+  }
+
+  .swim-icon__stack {
+    position: relative;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    line-height: 1em;
+    vertical-align: baseline;
+  }
+
+  .swim-icon__stack .swim-icon__i {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: inherit;
+    line-height: 1em;
+  }
+
+  /* Later icons paint on top (e.g. x over square-filled) */
+  .swim-icon__stack .swim-icon__i--1 {
+    z-index: 1;
+  }
+  .swim-icon__stack .swim-icon__i--2 {
+    z-index: 2;
+  }
+  .swim-icon__stack .swim-icon__i--3 {
+    z-index: 3;
+  }
+
+  .swim-icon__stack .swim-icon__i::before {
+    line-height: 1em;
+  }
+
+  /* Modifier: badge overlay (small icon at top-right), match swim-ui icons-effects */
+  .icon-fx-badge {
+    font-size: 0.25em !important;
+    position: relative;
+    top: -0.5em;
+    left: 0.5em;
+    width: auto;
+    height: auto;
+  }
+
+  /* Modifier: red color for overlay icon (match swim-ui) */
+  .text-red {
+    color: var(--red-500);
+  }
+
+  /* Font icon base (glyphs in icon-font-glyphs.ts); same codepoints as ngx-ui icon font. */
+  .swim-icon,
+  .swim-icon__i.swim-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    font: normal normal normal 1em/1 ${swimIconFontFamily};
+    font-family: ${swimIconFontFamily}, sans-serif;
+    flex-shrink: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Center the glyph in the em box; many icon glyphs sit high with display:block alone */
+  .swim-icon::before,
+  .swim-icon__i.swim-icon::before {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    line-height: 1;
+  }
+
+  [class^='icon-']:before,
+  [class*='icon-']:before {
+    line-height: 1;
+    font: normal normal normal 1em/1 ${swimIconFontFamily};
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Loading spinner: animate only the inner glyph inside this shadow root */
+  @keyframes swim-icon-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  :host([font-icon='loading']) .swim-icon__i {
+    animation: swim-icon-spin 1s linear infinite;
+  }
+
+  :host([font-icon='loading']) span[part='icon'] {
+    animation: swim-icon-spin 1s linear infinite;
+  }
+
+  ${iconFontGlyphs}
+`;

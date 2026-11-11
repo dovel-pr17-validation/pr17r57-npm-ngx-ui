@@ -1,0 +1,278 @@
+@use 'colors/colors' as colors;
+@use 'colors/gradient-variables' as gradients;
+
+.ngx-large-format-dialog-content {
+  --stepper-header-custom-offset: 0px;
+  --stepper-bar-track-offset: 12px;
+  --tabs-header-gap: 1.25rem;
+  --header-item-max-width: 400px;
+  --header-item-max-width-lg: 250px;
+  --header-item-max-width-md: 150px;
+
+  --max-height: calc(100vh - 7.25rem);
+  --header-height: 90px;
+  --footer-height: 4rem;
+  --max-body-height: auto;
+
+  --body-padding: 2rem;
+  .dialog-container {
+    border-radius: var(--radius-16);
+  }
+}
+
+.ngx-medium-format-dialog-content {
+  --stepper-header-custom-offset: 0px;
+  --stepper-bar-track-offset: 12px;
+  --tabs-header-gap: 1.25rem;
+  --header-item-max-width: 400px;
+  --header-item-max-width-lg: 250px;
+  --header-item-max-width-md: 150px;
+
+  --max-height: 75vh;
+  --header-height: 60px;
+  --footer-height: 4rem;
+  --max-body-height: calc(var(--max-height) - var(--header-height));
+
+  --body-padding: 2rem;
+  .dialog-container {
+    border-radius: var(--radius-16);
+  }
+}
+
+.ngx-medium-format-dialog-content,
+.ngx-large-format-dialog-content {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+
+  .dialog-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: var(--max-height, 75vh);
+    background: gradients.$bg-linear-3;
+    box-shadow: 0 0 100px rgba(0, 0, 0, 0.25);
+
+    &__header {
+      flex: 0 0 var(--header-height, 60px);
+      height: var(--header-height, 60px);
+      border-bottom: 2px solid colors.$color-blue-grey-700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+
+      .ngx-large-format-dialog-header-content {
+        flex: 1;
+        margin: 0 var(--spacing-12);
+      }
+
+      ngx-large-format-dialog-header-title:has(+ .ngx-large-format-dialog-header-content),
+      .ngx-large-format-dialog-header-content + .ngx-large-format-dialog-header-action {
+        flex: 0 0 auto;
+      }
+    }
+
+    &__body {
+      flex: 1 1 auto;
+      min-height: 215px;
+      max-height: var(--max-body-height, auto);
+      overflow: auto;
+      padding: 0 var(--body-padding, 2rem);
+    }
+
+    .ngx-medium-format-dialog-footer,
+    .ngx-large-format-dialog-footer {
+      flex: 0 0 var(--footer-height, 4rem);
+      height: var(--footer-height, 4rem);
+      border-top: 2px solid var(--grey-700);
+    }
+
+    .dialog-stepper,
+    .dialog-tabs {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+
+      &__header {
+        ngx-large-format-dialog-header-title.ngx-large-format-dialog-header-title,
+        ngx-large-format-dialog-header-action.ngx-large-format-dialog-header-action {
+          max-width: var(--header-item-max-width, 400px);
+          min-width: var(--header-item-max-width, 400px);
+        }
+
+        ngx-large-format-dialog-header-action.ngx-large-format-dialog-header-action {
+          position: relative;
+          z-index: 1;
+        }
+
+        @media screen and (max-width: 1319px) {
+          ngx-large-format-dialog-header-title.ngx-large-format-dialog-header-title,
+          ngx-large-format-dialog-header-action.ngx-large-format-dialog-header-action {
+            max-width: var(--header-item-max-width-lg, 250px);
+            min-width: var(--header-item-max-width-lg, 250px);
+          }
+        }
+
+        @media screen and (max-width: 959px) {
+          ngx-large-format-dialog-header-title.ngx-large-format-dialog-header-title,
+          ngx-large-format-dialog-header-action.ngx-large-format-dialog-header-action {
+            max-width: var(--header-item-max-width-md, 150px);
+            min-width: var(--header-item-max-width-md, 150px);
+          }
+        }
+      }
+
+      .ngx-tabs.tabs-horizontal button.ngx-tab {
+        height: 100%;
+      }
+
+      .ngx-tabs.tabs-horizontal button.ngx-tab::after {
+        bottom: 1px;
+      }
+    }
+
+    .dialog-stepper {
+      ngx-stepper.ngx-stepper:not(.dialog-stepper--sub) {
+        padding: 1rem 0 0;
+        margin-top: -5.5rem;
+        height: 100%;
+
+        /**
+        Semantically, we cannot extract the Stepper's steps + bar from inside the StepperComponent
+        and project it inside of our Dialog header. Thus, the width of the Steps and Bar/Track is calculated
+        by taking the combination of the following off of the 100% of the dialog width:
+        - HeaderTitle + HeaderAction max-width (400px by default)
+        - 8rem (outside padding + gap between HeaderTitle, HeaderAction, and the Steps)
+        - A custom offset (from both side) that the consumers can pass in to shrink additional width of the steps without increasing the HeaderTitle and HeaderAction max-width
+         */
+        > .ngx-stepper--steps {
+          margin: auto;
+          min-width: calc(100% - ((var(--header-item-max-width) + var(--stepper-header-custom-offset)) * 2) - 8rem);
+
+          ngx-step.ngx-step {
+            .ngx-step--title {
+              padding-top: 0.5rem;
+            }
+          }
+        }
+
+        /**
+          The BarTrack has its own offset (default to 12px)
+         */
+        > .ngx-stepper--bar-track {
+          margin: auto;
+
+          /* prettier-ignore */
+          min-width: calc(100% - ((var(--header-item-max-width) + var(--stepper-header-custom-offset)) * 2) - 8rem + var(--stepper-bar-track-offset));
+
+          .ngx-stepper--bar {
+            top: 32px;
+          }
+        }
+
+        > .ngx-stepper--content {
+          margin-top: 1.25rem;
+          overflow: auto;
+          padding: 0 2rem;
+        }
+
+        @media screen and (max-width: 1319px) {
+          > .ngx-stepper--steps {
+            /* prettier-ignore */
+            min-width: calc(100% - ((var(--header-item-max-width-lg) + var(--stepper-header-custom-offset)) * 2) - 8rem);
+          }
+
+          > .ngx-stepper--bar-track {
+            /* prettier-ignore */
+            min-width: calc(100% - ((var(--header-item-max-width-lg) + var(--stepper-header-custom-offset)) * 2) - 8rem + var(--stepper-bar-track-offset));
+          }
+        }
+
+        @media screen and (max-width: 959px) {
+          > .ngx-stepper--steps {
+            /* prettier-ignore */
+            min-width: calc(100% - ((var(--header-item-max-width-md) + var(--stepper-header-custom-offset)) * 2) - 8rem);
+          }
+
+          > .ngx-stepper--bar-track {
+            /* prettier-ignore */
+            min-width: calc(100% - ((var(--header-item-max-width-md) + var(--stepper-header-custom-offset)) * 2) - 8rem + var(--stepper-bar-track-offset));
+          }
+        }
+      }
+    }
+
+    .dialog-tabs {
+      ngx-tabs.ngx-tabs:not(.dialog-tabs--sub) {
+        height: 100%;
+        margin: 0;
+
+        > section {
+          height: 100%;
+
+          /**
+        Semantically, we cannot extract the Tabs from inside of TabsComponent and project it in our Dialog Header.
+        Thus, this width of the Tabs (tabs labels) is calculated by taking the combination of the following off of 100%:
+        - HeaderTitle + HeaderAction max-width (400px by default)
+        - 8rem (outside padding + gap between HeaderTitle, HeaderAction, and the Steps)
+         */
+          > .ngx-tabs-list {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 5.5rem;
+            margin: -5.5rem auto 0;
+            border-bottom: unset;
+
+            /**
+            used to separated the Labels. Default to 20px
+             */
+            gap: var(--tabs-header-gap);
+            max-width: calc(100% - (var(--header-item-max-width) * 2) - 8rem);
+
+            .ngx-tab {
+              button {
+                text-transform: uppercase;
+                font-size: 0.8125rem;
+                font-weight: bold;
+                line-height: 1rem;
+                color: var(--grey-400);
+
+                &::after {
+                  top: 3.5rem;
+                }
+              }
+
+              &.active {
+                button {
+                  color: var(--white);
+                }
+              }
+            }
+          }
+
+          > .ngx-tab-content {
+            padding: 0 2rem;
+            overflow: auto;
+            height: calc(100% - 5.5rem);
+          }
+
+          @media screen and (max-width: 1319px) {
+            > .ngx-tabs-list {
+              max-width: calc(100% - (var(--header-item-max-width-lg) * 2) - 8rem);
+            }
+          }
+
+          @media screen and (max-width: 959px) {
+            > .ngx-tabs-list {
+              max-width: calc(100% - (var(--header-item-max-width-md) * 2) - 8rem);
+            }
+          }
+        }
+      }
+    }
+  }
+}

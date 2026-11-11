@@ -1,0 +1,203 @@
+@use 'colors/colors' as colors;
+@use 'colors/shadow-variables' as shadow;
+
+$dialog-bg: var(--grey-800);
+$dialog-header-color: var(--grey-100);
+$dialog-body-color: var(--grey-200);
+
+.ngx-dialog {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100%;
+  pointer-events: none;
+
+  .ngx-dialog-content {
+    pointer-events: auto;
+    border-radius: var(--radius-8);
+    box-shadow: shadow.$shadow-3;
+    background: $dialog-bg;
+    padding: 1.4rem;
+    position: relative;
+    animation-fill-mode: forwards;
+    min-width: 250px;
+    font-size: var(--font-size-m);
+    color: $dialog-body-color;
+
+    &--large,
+    &--medium {
+      padding: var(--spacing-0);
+      width: calc(100vw - 120px);
+      background-color: transparent;
+    }
+
+    &--large {
+      height: calc(100vh - 120px);
+      max-height: calc(100vh - 120px);
+      border-radius: var(--radius-16);
+    }
+
+    &--medium {
+      height: auto;
+      min-height: 340px;
+      max-height: 75vh;
+      max-width: 900px;
+      border-radius: var(--radius-16);
+    }
+
+    .close {
+      position: absolute;
+      font-size: var(--font-size-s);
+      color: var(--grey-400);
+      right: 1rem;
+      top: 1rem;
+      &:hover,
+      &:active {
+        color: var(--white);
+      }
+    }
+
+    .ngx-dialog-header {
+      .ngx-dialog-title,
+      h1 {
+        font-size: 1.8rem;
+        font-weight: 500;
+        margin: var(--spacing-0) var(--spacing-0) 1.4rem var(--spacing-0);
+        color: $dialog-header-color;
+      }
+    }
+
+    &--medium {
+      .ngx-dialog-header {
+        border-top-left-radius: var(--radius-16);
+        border-top-right-radius: var(--radius-16);
+      }
+    }
+
+    &--large {
+      .ngx-dialog-header {
+        border-top-left-radius: var(--radius-16);
+        border-top-right-radius: var(--radius-16);
+      }
+    }
+
+    .ngx-dialog-footer {
+      text-align: right;
+
+      .btn {
+        margin-left: var(--spacing-4);
+      }
+    }
+  }
+
+  &.wizard {
+    .ngx-dialog-content {
+      padding: var(--spacing-0);
+      background: var(--grey-725);
+
+      .ngx-dialog-header {
+        padding: 1.4rem;
+        background: var(--grey-750);
+        border-top-left-radius: var(--radius-16);
+        border-top-right-radius: var(--radius-16);
+
+        h1 {
+          margin: var(--spacing-0);
+        }
+      }
+
+      .ngx-dialog-footer {
+        padding: 1.4rem;
+
+        .wizard-nav {
+          float: left;
+
+          .btn {
+            margin: var(--spacing-0) var(--spacing-4) var(--spacing-0) var(--spacing-0);
+          }
+        }
+      }
+
+      .ngx-tabs {
+        margin-bottom: var(--spacing-0);
+
+        .ngx-tabs-list {
+          padding: var(--spacing-0) var(--spacing-20);
+          background: var(--grey-775);
+          border-bottom: 2px solid var(--grey-775);
+
+          .ngx-tab {
+            background: var(--grey-775);
+
+            button {
+              padding: 0.6em 0.75em;
+              text-transform: uppercase;
+            }
+
+            &.active {
+              background: var(--grey-700);
+            }
+          }
+        }
+
+        .ngx-tab-content {
+          padding: 1.4rem 1.4rem 0 1.4rem;
+        }
+      }
+    }
+  }
+
+  &.ngx-dialog-full-screen {
+    width: 100vw;
+    height: 100%;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    .ngx-dialog-content {
+      box-shadow: none;
+      width: 100%;
+      min-height: 100vh;
+
+      button.close {
+        position: absolute;
+        font-size: var(--font-size-s);
+        color: var(--grey-400);
+        right: 6px;
+        top: 8px;
+        &:hover,
+        &:active {
+          color: var(--white);
+        }
+      }
+    }
+  }
+
+  @keyframes anim-open {
+    0% {
+      opacity: 0;
+      transform: scale3d(1.1, 1.1, 1);
+    }
+    100% {
+      opacity: 1;
+      transform: scale3d(1, 1, 1);
+    }
+  }
+
+  @keyframes anim-close {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: scale3d(0.9, 0.9, 1);
+    }
+  }
+}

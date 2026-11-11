@@ -1,0 +1,20 @@
+{
+  "name": "@swimlane/ngx-ui-testing",
+  "version": "43.0.0",
+  "description": "",
+  "main": "esm2022/index.mjs",
+  "types": "esm2022/index.d.ts",
+  "typings": "esm2022/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "tsc"
+  },
+  "author": "Swimlane",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.3.5"
+  },
+  "peerDependencies": {
+    "cypress": ">=13.0.0"
+  }
+}

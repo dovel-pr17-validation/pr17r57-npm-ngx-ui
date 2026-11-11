@@ -1,0 +1,36 @@
+@use '../colors/colors' as colors;
+
+$tag-background: colors.$color-blue-grey-600;
+$tag-color: white;
+
+.tag {
+  cursor: default;
+  border-radius: var(--radius-6);
+  display: inline-block;
+  margin: 0 8px 0 0;
+  box-sizing: border-box;
+  position: relative;
+  background: $tag-background;
+  color: $tag-color;
+  font-size: 14px;
+  padding: 0 0.3rem;
+
+  &.tag-small {
+    font-size: 0.7rem;
+  }
+
+  &.tag-large {
+    font-size: 1.2rem;
+  }
+
+  &.tag-filled {
+    background-color: colors.$color-blue-grey-050;
+    color: colors.$color-blue-grey-800;
+  }
+
+  &.tag-bordered {
+    border: 1px solid colors.$color-light-blue-400;
+    color: white;
+    background-color: transparent;
+  }
+}

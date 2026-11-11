@@ -1,0 +1,35 @@
+/* eslint-disable no-console */
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
+
+const counts = {};
+
+/** Counts teh number of times a counter with the given id is initialized. */
+@Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: 'counter',
+  template: `
+    <h2>
+      ngOnInit ran
+      {{ this.count }}
+      <span [ngPlural]="this.count">
+        <ng-template ngPluralCase="=1">time</ng-template>
+        <ng-template ngPluralCase="other">times</ng-template>
+      </span>
+    </h2>
+  `,
+  // eslint-disable-next-line @angular-eslint/prefer-on-push-component-change-detection
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
+})
+export class CounterComponent implements OnInit {
+  @Input()
+  id: string;
+
+  count: number;
+
+  ngOnInit() {
+    this.count = counts[this.id] || 0;
+    console.log(this.id, 'counter instances: ', this.count++);
+    counts[this.id] = this.count;
+  }
+}

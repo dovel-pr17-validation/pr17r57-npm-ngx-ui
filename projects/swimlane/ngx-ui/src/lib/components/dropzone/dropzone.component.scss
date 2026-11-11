@@ -1,0 +1,172 @@
+@use 'colors/colors' as colors;
+
+@keyframes soundWave {
+  100% {
+    stroke: var(--blue-500);
+    scale: 1.2;
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.5);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.ngx-dropzone {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--spacing-48);
+  border-radius: var(--radius-16);
+
+  .file-over {
+    .ngx-dropzone--label {
+      .ngx-dropzone--rings {
+        path {
+          animation: soundWave 1s infinite;
+          transform-origin: center;
+
+          @for $i from 0 through 8 {
+            &.ngx-dropzone--ring-#{$i + 1} {
+              animation-delay: $i * 0.08s;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .ngx-dropzone--input {
+    display: none;
+  }
+
+  .ngx-dropzone--label {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin: var(--spacing-0);
+    font-weight: var(--font-weight-regular);
+    cursor: pointer;
+    animation: popIn 0.35s ease-in-out;
+    height: 500px;
+    width: 500px;
+
+    .ngx-dropzone--rings {
+      fill: none;
+      width: 100%;
+      overflow: visible;
+
+      path {
+        clip-rule: evenodd;
+        fill-rule: evenodd;
+        stroke: var(--grey-650);
+        stroke-width: 2;
+        stroke-linejoin: round;
+        transition: stroke 0.2s ease-in-out;
+      }
+    }
+
+    .ngx-dropzone--btn {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+
+      .ngx-dropzone--icon {
+        font-size: 30px;
+        color: var(--grey-100);
+      }
+
+      .ngx-dropzone--title {
+        font-size: var(--font-size-xl);
+        line-height: 25px;
+        font-weight: var(--font-weight-semibold);
+        margin-bottom: var(--spacing-4);
+        color: var(--grey-100);
+      }
+
+      .ngx-dropzone--sub-title {
+        color: var(--blue-400);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-bold);
+        transition: color 0.2s ease-in-out;
+
+        &:hover,
+        &:focus {
+          color: var(--blue-300);
+        }
+
+        .underline {
+          border-bottom: 1px dotted;
+        }
+      }
+
+      .ngx-dropzone--supporting-files {
+        margin-top: var(--spacing-20);
+        color: var(--grey-350);
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-0) 10px;
+      }
+    }
+  }
+
+  &--small {
+    box-sizing: border-box;
+    height: 120px;
+    background-color: var(--grey-800);
+    border: 1px dashed var(--grey-500);
+    padding: var(--spacing-0);
+    justify-content: center;
+
+    .file-over {
+      .ngx-dropzone--icon {
+        i {
+          background: -moz-linear-gradient(350.57deg, #006ae0 14.42%, #04a6e6 100%);
+          background: -webkit-linear-gradient(350.57deg, #006ae0 14.42%, #04a6e6 100%);
+          background: linear-gradient(350.57deg, #006ae0 14.42%, #04a6e6 100%);
+          -webkit-background-clip: text;
+          -moz-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+      }
+    }
+
+    .ngx-dropzone--label {
+      height: 100%;
+
+      .ngx-dropzone--btn {
+        position: relative;
+        left: 0;
+        top: 0;
+        transform: none;
+
+        .ngx-dropzone--title {
+          font-size: var(--font-size-xs);
+          line-height: 15px;
+          margin-bottom: var(--spacing-0);
+        }
+
+        .ngx-dropzone--sub-title {
+          font-size: var(--font-size-xxs);
+        }
+      }
+    }
+
+    &:has(.file-over) {
+      border: 1px dashed #04a6e6;
+    }
+  }
+}

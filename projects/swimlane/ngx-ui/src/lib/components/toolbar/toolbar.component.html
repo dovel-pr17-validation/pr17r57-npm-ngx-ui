@@ -1,0 +1,53 @@
+<header class="flex-container">
+  <div class="ngx-toolbar-title-col">
+    @if (!mainTitle) {
+      <ng-content select="ngx-toolbar-title"></ng-content>
+    }
+    @if (mainTitle) {
+      <h2 class="ngx-toolbar-title">
+        {{ mainTitle }}
+        @if (subtitle) {
+          <small>{{ subtitle }}</small>
+        }
+      </h2>
+    }
+  </div>
+  <div class="ngx-toolbar-content-col">
+    @if (!menu.length) {
+      <ng-content select="ngx-toolbar-content"></ng-content>
+    }
+    @if (menu.length) {
+      <ul class="horizontal-list ngx-toolbar-menu">
+        @for (item of toolbarItems; track item) {
+          <li>
+            <button type="button" [disabled]="item.disabled" (click)="onMenuClicked(item, $event)">
+              {{ item.label }}
+            </button>
+          </li>
+        }
+        @if (dropdownItems.length) {
+          <li>
+            <ngx-dropdown>
+              <ngx-dropdown-toggle>
+                <button type="button">
+                  ...
+                </button>
+              </ngx-dropdown-toggle>
+              <ngx-dropdown-menu class="align-right">
+                <ul class="vertical-list">
+                  @for (item of dropdownItems; track item) {
+                    <li>
+                      <button type="button" (click)="onMenuClicked(item, $event)">
+                        {{ item.label }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              </ngx-dropdown-menu>
+            </ngx-dropdown>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</header>

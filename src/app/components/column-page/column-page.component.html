@@ -1,0 +1,177 @@
+<h3 class="style-header">Column</h3>
+
+<ngx-tabs>
+  <ngx-tab label="Examples" [active]="true">
+    <ngx-section class="shadow" sectionTitle="Column">
+      <ng-template #columnHeaderTpl let-column let-expanded="expanded">
+        @switch (column.id) {
+          @case ('1a') {
+            <ngx-toggle style="margin-left: auto;"></ngx-toggle>
+          }
+          @case ('1b') {
+            @if (expanded) {
+              <ngx-button class="btn btn-sm" style="margin-left: auto;">Action</ngx-button>
+            }
+          }
+          @default {
+            @if (expanded) {
+              <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                <ngx-toggle [label]="'Active'"></ngx-toggle>
+                <ngx-button class="btn btn-sm">Action</ngx-button>
+              </div>
+            }
+          }
+        }
+      </ng-template>
+
+      <ngx-columns [column]="column" [height]="'400'" [headerTemplate]="columnHeaderTpl"></ngx-columns>
+
+      <br />
+      <br />
+
+      <ngx-tabs>
+        <ngx-tab label="Markup">
+          <!-- prettier-ignore -->
+          <app-prism ngNonBindable>
+  <![CDATA[
+  <ng-template #columnHeaderTpl let-column let-expanded="expanded">
+    @switch (column.id) {
+      @case ('1a') {
+        <ngx-toggle style="margin-left: auto;"></ngx-toggle>
+      }
+      @case ('1b') {
+       @if (expanded) {
+          <ngx-button class="btn btn-sm" style="margin-left: auto;">Action</ngx-button>
+       }
+      }
+      @default {
+        @if (expanded) {
+          <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+            <ngx-toggle [label]="'Active'"></ngx-toggle>
+            <ngx-button class="btn btn-sm">Action</ngx-button>
+          </div>
+        }
+      }
+    }
+  </ng-template>
+
+  <ngx-columns [column]="column" [headerTemplate]="columnHeaderTpl"></ngx-columns>
+  ]]>
+          </app-prism>
+
+          <hr />
+          <h3>Model</h3>
+          <pre>{{ column | json }}</pre>
+        </ngx-tab>
+      </ngx-tabs>
+    </ngx-section>
+  </ngx-tab>
+  <ngx-tab label="API">
+    <h3>Table of Contents</h3>
+    <a class="documentation-content" (click)="scrollTo('ngx-columns-inputs')">Inputs</a>
+    <a class="documentation-content" (click)="scrollTo('ngx-columns-column-spec')">Spec</a>
+    <h3 class="style-header" id="ngx-columns-inputs">ngx-columns Inputs</h3>
+    <table class="table documentation-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>
+            <code class="component-type">&#64;Input()</code>
+            <code>column: Partial&lt;Column&gt;</code>
+          </th>
+          <td>
+            Single Column that either displays a list of options for the user to interact with or custom content. This
+            column should include the entire nested structure of the columns and should have the `active` property set
+            to `true`. See Examples tab for more information.
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <code class="component-type">&#64;Input()</code>
+            <code>height: string</code>
+          </th>
+          <td>Change the overall height of the columns by providing a <code>string</code> value in pixels.</td>
+        </tr>
+        <tr>
+          <th>
+            <code class="component-type">&#64;Input()</code>
+            <code>headerTemplate: TemplateRef&lt;any&gt;</code>
+          </th>
+          <td>
+            An optional <code>ng-template</code> rendered on the right side of each column header. The template
+            receives the <code>Column</code> object as its implicit context (<code>$implicit</code>), so use
+            <code>let-column</code> to access column properties and render different content per column.
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <code class="component-type">&#64;Input()</code>
+            <code>onColumnChange: ColumnTabClickEvent</code>
+          </th>
+          <td>Emits whenever there is user interaction that changes the active column.</td>
+        </tr>
+      </tbody>
+    </table>
+    <hr />
+    <h3 class="style-header" id="ngx-columns-column-spec">ngx-columns Column</h3>
+    <table class="table documentation-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>
+            <code class="component-type">&#64;Input()</code>
+            <code>column: Partial&lt;Column&gt;</code>
+          </th>
+          <td>
+            <p>
+              Single Column that either displays a list of options for the user to interact with or custom content. This
+              column should include the entire nested structure of the columns and should have the `active` property set
+              to `true`. Below is an example.
+            </p>
+
+            <pre>{{ columnExample | json }}</pre>
+
+            <p>
+              Notice how each Column requires a unique identifier (id), active property, title which displays the label
+              when the Column is in a list or when active, the name of the adjacent Column.
+            </p>
+            <p>
+              The first Column should always have an active property set to true to be displayed correctly. Any Column
+              you wish to open on load that is descendant to this Column should also have it's active property set to
+              true.
+            </p>
+            <p>
+              Column can either accept a list of Columns set on the children property or a custom template set on the
+              content property. Internally ngx-columns will display either a list of options or the custom content
+              specified. The content property model maps to the same interface used by vcr().createComponent(). When
+              content is specified, set a component property to the Component reference you wish to dynamically
+              generate. The component property is passed in the first argument of createComponent internally. Pass any
+              option to the second argument of createComponent using the options property.
+            </p>
+
+            <p>
+              width is an additional property on content that allows you to specify a custom width for the content area,
+              otherwise the ColumnsComponent will try to auto layout the content area to fill the remaining width.
+            </p>
+
+            <p>
+              In the above example, the component is referenced as a string for visibility. In practice, pass the
+              reference to the Component you want to display in the custom content area.
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <hr />
+  </ngx-tab>
+</ngx-tabs>

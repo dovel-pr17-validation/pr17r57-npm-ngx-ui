@@ -1,0 +1,32 @@
+@if ((hotkeys$ | async).length > 0) {
+  <div class="hotkeys-container">
+    @if (visible) {
+      <div class="hotkeys" [@containerAnimationState]="'active'">
+        @for (hotkey of hotkeys$ | async; track hotkey) {
+          <div class="hotkey-row">
+            {{ hotkey.description }}
+            <div class="combination">
+              @for (key of hotkey.keys; track key; let i = $index) {
+                <span>
+                  <span class="key">{{ key }}</span> @if (i < hotkey.keys.length - 1) {
+                  <span> + </span>
+                }
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+  @if (visible) {
+    <div class="close-icon ngx-icon ngx-x-filled" (click)="hide()" [@iconAnimationState]="'active'"></div>
+  }
+  @if (!visible) {
+    <div
+      class="hotkeys-icon ngx-icon ngx-keyboard"
+      (click)="show()"
+      [@iconAnimationState]="'active'"
+    ></div>
+  }
+</div>
+}

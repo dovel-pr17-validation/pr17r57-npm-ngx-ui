@@ -1,0 +1,18 @@
+@use 'vendor/index' as vendor;
+@use 'colors/colors' as colors;
+@use 'components/index' as components;
+
+.appearance-table {
+  max-width: 100%;
+
+  tr td {
+    height: 170px;
+    overflow: auto;
+    position: relative;
+    vertical-align: top;
+
+    ngx-tooltip-content {
+      top: 0;
+    }
+  }
+}

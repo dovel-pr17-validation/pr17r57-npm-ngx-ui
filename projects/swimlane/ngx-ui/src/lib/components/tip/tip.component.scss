@@ -1,0 +1,104 @@
+@use 'colors/colors' as colors;
+
+$color-default: var(--grey-350); // default icon and border left
+$color-border: var(--grey-650);
+
+.ngx-tip {
+  .tip-container {
+    border: 2px solid $color-border;
+    border-top-right-radius: var(--radius-8);
+    border-bottom-right-radius: var(--radius-8);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-10);
+    position: relative;
+
+    // rounded left border
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      bottom: -2px;
+      background: $color-default;
+      width: 2px;
+      left: -2px;
+    }
+
+    .tip-content {
+      display: flex;
+      height: 100%;
+
+      &--icon {
+        color: $color-default;
+        font-size: 14px;
+        padding-top: 3px;
+      }
+
+      &--template {
+        font-size: 14px;
+        line-height: 20px;
+        margin: var(--spacing-0) 10px;
+        color: var(--grey-250);
+      }
+    }
+
+    &--close {
+      margin-top: -1px;
+      .ngx-icon {
+        color: var(--grey-400);
+        font-size: var(--font-size-xxs);
+        &:hover,
+        &:active {
+          color: var(--white);
+        }
+      }
+
+      cursor: pointer;
+    }
+  }
+
+  &.ngx-tip--success {
+    .tip-container {
+      &::before {
+        background: var(--green-500);
+      }
+
+      .tip-content {
+        &--icon {
+          .ngx-icon {
+            color: var(--green-500);
+          }
+        }
+      }
+    }
+  }
+
+  &.ngx-tip--error {
+    .tip-container {
+      &::before {
+        background: var(--color-error);
+      }
+
+      .tip-content {
+        &--icon .ngx-icon {
+          color: var(--color-error);
+        }
+      }
+    }
+  }
+
+  &.ngx-tip--warning {
+    .tip-container {
+      &::before {
+        background: var(--orange-400);
+      }
+
+      .tip-content {
+        &--icon .ngx-icon {
+          color: var(--orange-400);
+        }
+      }
+    }
+  }
+}

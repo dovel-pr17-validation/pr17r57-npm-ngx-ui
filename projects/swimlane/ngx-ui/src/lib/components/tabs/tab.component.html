@@ -1,0 +1,12 @@
+@if (template) {
+  @if (active) {
+    <div>
+      <ng-container [ngTemplateOutlet]="template.templateRef"></ng-container>
+    </div>
+  }
+} @else {
+  <div [hidden]="!active">
+    <ng-content></ng-content>
+  </div>
+}
+<ng-template #labelIsStringTmpl>{{ label }}</ng-template>

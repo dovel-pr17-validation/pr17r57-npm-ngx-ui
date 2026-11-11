@@ -1,0 +1,75 @@
+<main class="dialog-container">
+  @if (!stepperTemplate && !tabsTemplate) {
+    <header class="dialog-container__header">
+      <ng-container *ngTemplateOutlet="header"></ng-container>
+    </header>
+    <section class="dialog-container__body">
+      <ng-content></ng-content>
+    </section>
+  } @else {
+    <section
+      [ngClass]="{
+        'dialog-container--stepper dialog-stepper': !!stepperTemplate,
+        'dialog-container--tabs dialog-tabs': !!tabsTemplate
+      }"
+      >
+      <header
+        class="dialog-container__header"
+        [ngClass]="{
+          'dialog-stepper__header': !!stepperTemplate,
+          'dialog-tabs__header': !!tabsTemplate
+        }"
+        >
+        <ng-container *ngTemplateOutlet="header"></ng-container>
+      </header>
+      @if (stepperTemplate) {
+        <ng-container *ngTemplateOutlet="stepperTemplate"></ng-container>
+      }
+      @if (tabsTemplate) {
+        <ng-container *ngTemplateOutlet="tabsTemplate"></ng-container>
+      }
+    </section>
+  }
+
+  <ng-content select="ngx-large-format-dialog-footer"></ng-content>
+  <ng-content select="ngx-medium-format-dialog-footer"></ng-content>
+</main>
+
+<ng-template #myTemplate>
+  @if (imgSrc && !logoTemplate) {
+    <img
+      class="ngx-large-format-dialog-header-title__img"
+      [class.ngx-large-format-dialog-header-title__img__default-background]="removeImageBackground"
+      [src]="imgSrc"
+      draggable="false"
+      />
+  }
+  @if (!imgSrc && logoTemplate) {
+    <div class="ngx-large-format-dialog-header-title__clear">
+      <ng-container *ngTemplateOutlet="logoTemplate"></ng-container>
+    </div>
+  }
+</ng-template>
+
+<ng-template #header>
+  <ngx-large-format-dialog-header-title
+    [format]="format"
+    [dialogTitle]="dialogTitle"
+    [dialogSubtitle]="dialogSubtitle"
+    [imageTemplate]="imageTemplate"
+    [dialogSubtitleTemplate]="dialogSubtitleTemplate"
+  ></ngx-large-format-dialog-header-title>
+  @if (!stepperTemplate && !tabsTemplate) {
+    @if (largeFormatDialogHeaderContent) {
+      <div class="ngx-large-format-dialog-header-content">
+        <ng-container *ngTemplateOutlet="largeFormatDialogHeaderContent"></ng-container>
+      </div>
+    }
+  }
+  <ngx-large-format-dialog-header-action
+    [dirty]="dirty"
+    [actionTitle]="dialogActionTitle"
+    [dirtyActionTitle]="dialogDirtyActionTitle"
+    (closeOrCancel)="onCloseOrCancel($event)"
+  ></ngx-large-format-dialog-header-action>
+</ng-template>

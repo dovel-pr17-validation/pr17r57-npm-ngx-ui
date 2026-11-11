@@ -1,0 +1,34 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "baseUrl": "./",
+    "importHelpers": true,
+    "outDir": "./dist/out-tsc",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": false,
+    "module": "es2020",
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "target": "ES2022",
+    "typeRoots": ["node_modules/@types"],
+    "paths": {
+      "@swimlane/ngx-ui": ["projects/swimlane/ngx-ui/src/public_api"],
+      "@swimlane/ngx-ui/*": ["projects/swimlane/ngx-ui/src/lib/*"],
+      "@swimlane/ngx-ui-testing": ["projects/swimlane/ngx-ui-testing/index"],
+      "@swimlane/ngx-ui-testing/*": ["projects/swimlane/ngx-ui-testing/*"],
+      "@angular/*": ["node_modules/@angular/*"],
+      "tslib": ["node_modules/tslib"]
+    },
+    "skipLibCheck": true,
+    "useDefineForClassFields": false,
+    "strict": false,
+    "ignoreDeprecations": "6.0"
+  },
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}

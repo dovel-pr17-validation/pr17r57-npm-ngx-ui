@@ -1,0 +1,1196 @@
+import { LitElement, html, nothing, PropertyValues, TemplateResult } from 'lit';
+import { property, state, query } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
+import { baseStyles } from '../../styles/base';
+import { scrollbarStyles } from '../../styles/scrollbars';
+import { selectStyles } from './select.styles';
+import { SelectOption } from './select-option.interface';
+import { optionMatchesFilter } from './select-filter.util';
+import { InputAppearance } from '../input/input-appearance.enum';
+import { InputSize } from '../input/input-size.enum';
+import { coerceBooleanProperty, litBooleanAttrDefaultFalse, litBooleanAttrDefaultTrue } from '../../utils/coerce';
+import '../icon/icon.component';
+import './select-option.component';
+
+/**
+ * SwimSelect - A select/dropdown component matching @swimlane/ngx-ui design system
+ *
+ * Options can be provided via the `options` property or declaratively with `<swim-option>` children.
+ * Set the `grouped` attribute to show section headers from each option’s `group`
+ * (`SelectOption` field or `<swim-option group="...">`). Without `grouped`, `group` is ignored for layout.
+ * ```html
+ * <swim-select label="Attack Type">
+ *   <swim-option name="Breach" value="breach"></swim-option>
+ *   <swim-option name="DDOS" value="ddos"></swim-option>
+ * </swim-select>
+ * ```
+ *
+ * @slot - swim-option children for declarative options
+ * @slot hint - Custom hint content
+ * @slot empty - Custom empty-state content when the dropdown has no options to show
+ *
+ * @fires change - Fired when selection changes (does not bubble; listen on this element).
+ * @fires dropdown-open - Options panel opened (does not bubble).
+ * @fires dropdown-close - Options panel closed (does not bubble).
+ * @fires filter-change - With `async-filter`: debounced `detail.query` for remote search (does not bubble).
+ *
+ * @csspart select - The select input element
+ * @csspart dropdown - The dropdown container
+ * @csspart empty - The empty-state container (string placeholder or slotted content)
+ */
+const SELECT_TAG = 'swim-select';
+
+/** Top-layer popover avoids clipping inside transformed / overflow:hidden ancestors (e.g. dialogs). */
+const SELECT_POPOVER_TOP_LAYER =
+  typeof HTMLElement !== 'undefined' && typeof HTMLElement.prototype.showPopover === 'function';
+
+export class SwimSelect extends LitElement {
+  static styles = [baseStyles, scrollbarStyles, selectStyles];
+  static formAssociated = true;
+
+  private _internals: ElementInternals;
+
+  @query('.select-input')
+  private selectInput!: HTMLDivElement;
+
+  @query('.select-filter-input')
+  private filterInput?: HTMLInputElement;
+
+  /**
+   * Select label
+   */
+  @property({ type: String })
+  label = '';
+
+  /**
+   * Placeholder text
+   */
+  @property({ type: String })
+  placeholder = 'Select...';
+
+  /**
+   * Hint text
+   */
+  @property({ type: String })
+  hint = '';
+
+  /**
+   * Empty placeholder when no options
+   */
+  @property({ type: String, attribute: 'empty-placeholder' })
+  emptyPlaceholder = 'No options available';
+
+  /**
+   * Filter placeholder
+   */
+  @property({ type: String, attribute: 'filter-placeholder' })
+  filterPlaceholder = 'Filter options...';
+
+  /**
+   * Icon name for the filter field; '' hides it. Default: 'search'.
+   */
+  @property({ type: String, attribute: 'filter-icon' })
+  filterIcon = 'search';
+
+  /**
+   * When the filter matches nothing (sync) or async search returned no users
+   */
+  @property({ type: String, attribute: 'filter-empty-placeholder' })
+  filterEmptyPlaceholder = 'No matches';
+
+  /**
+   * Shown while `loading` is true during async search
+   */
+  @property({ type: String, attribute: 'filter-searching-placeholder' })
+  filterSearchingPlaceholder = 'Searching…';
+
+  /**
+   * Remote search: skip local filtering; parent updates `options` after `filter-change`
+   */
+  @property({ type: Boolean, attribute: 'async-filter', converter: litBooleanAttrDefaultFalse })
+  get asyncFilter(): boolean {
+    return this._asyncFilter;
+  }
+  set asyncFilter(value: boolean) {
+    this._asyncFilter = coerceBooleanProperty(value);
+  }
+  private _asyncFilter = false;
+
+  @property({ type: Number, attribute: 'filter-debounce-ms' })
+  filterDebounceMs = 500;
+
+  @property({ type: Number, attribute: 'filter-min-length' })
+  filterMinLength = 2;
+
+  /**
+   * With the popover top layer, `start` anchors the panel to the combobox; `center` uses the
+   * full host width and horizontal bounds so the menu lines up with centered columns (e.g. dialogs).
+   */
+  @property({ type: String, attribute: 'dropdown-align' })
+  dropdownAlign: 'start' | 'center' = 'start';
+
+  @property({ type: Boolean, reflect: true, converter: litBooleanAttrDefaultFalse })
+  get loading(): boolean {
+    return this._loading;
+  }
+  set loading(value: boolean) {
+    this._loading = coerceBooleanProperty(value);
+  }
+  private _loading = false;
+
+  /**
+   * Select options
+   */
+  @property({ type: Array })
+  options: SelectOption[] = [];
+
+  /**
+   * Selected value(s)
+   */
+  @property()
+  get value(): any | any[] {
+    return this.multiple ? this._value : (this._value[0] ?? null);
+  }
+  set value(val: any | any[]) {
+    const oldValue = this._value;
+    if (this.multiple) {
+      this._value = Array.isArray(val) ? val : val ? [val] : [];
+    } else {
+      this._value = val ? [val] : [];
+    }
+    this._internals.setFormValue(this.multiple ? JSON.stringify(this._value) : (this._value[0] ?? ''));
+    this.requestUpdate('value', oldValue);
+    this._updateActiveState();
+  }
+  private _value: any[] = [];
+
+  /**
+   * Input name for forms
+   */
+  @property({ type: String })
+  name = '';
+
+  /**
+   * Input ID
+   */
+  @property({ type: String })
+  id = `swim-select-${Math.random().toString(36).substr(2, 9)}`;
+
+  /**
+   * Whether the select is disabled
+   */
+  @property({ type: Boolean, reflect: true, converter: litBooleanAttrDefaultFalse })
+  get disabled(): boolean {
+    return this._disabled;
+  }
+  set disabled(value: boolean) {
+    this._disabled = coerceBooleanProperty(value);
+  }
+  private _disabled = false;
+
+  /**
+   * Whether the select is required
+   */
+  @property({ type: Boolean, reflect: true, converter: litBooleanAttrDefaultFalse })
+  get required(): boolean {
+    return this._required;
+  }
+  set required(value: boolean) {
+    this._required = coerceBooleanProperty(value);
+  }
+  private _required = false;
+
+  /**
+   * Select appearance
+   */
+  @property({ type: String, reflect: true })
+  appearance: InputAppearance = InputAppearance.legacy;
+
+  /**
+   * Select size
+   */
+  @property({ type: String, reflect: true })
+  size: InputSize = InputSize.sm;
+
+  /**
+   * Whether to show margin
+   */
+  @property({ type: Boolean, reflect: true, attribute: 'marginless', converter: litBooleanAttrDefaultFalse })
+  get marginless(): boolean {
+    return !this._withMargin;
+  }
+  set marginless(value: boolean) {
+    this._withMargin = !coerceBooleanProperty(value);
+  }
+  private _withMargin = true;
+
+  /**
+   * When true, the hint row is rendered only if `hint` is non-empty or a direct child uses `slot="hint"`.
+   * When false, the hint row is never rendered.
+   */
+  @property({ type: Boolean, converter: litBooleanAttrDefaultTrue })
+  get withHint(): boolean {
+    return this._withHint;
+  }
+  set withHint(value: boolean) {
+    this._withHint = coerceBooleanProperty(value);
+  }
+  private _withHint = true;
+
+  /**
+   * Enable filtering
+   */
+  @property({ type: Boolean, converter: litBooleanAttrDefaultTrue })
+  get filterable(): boolean {
+    return this._filterable;
+  }
+  set filterable(value: boolean) {
+    this._filterable = coerceBooleanProperty(value);
+  }
+  private _filterable = true;
+
+  /**
+   * When true, show `group` as section headers in the dropdown (and indent options).
+   */
+  @property({ type: Boolean, reflect: true, converter: litBooleanAttrDefaultFalse })
+  get grouped(): boolean {
+    return this._grouped;
+  }
+  set grouped(value: boolean) {
+    this._grouped = coerceBooleanProperty(value);
+  }
+  private _grouped = false;
+
+  /**
+   * Allow multiple selection
+   */
+  @property({ type: Boolean, reflect: true, converter: litBooleanAttrDefaultFalse })
+  get multiple(): boolean {
+    return this._multiple;
+  }
+  set multiple(value: boolean) {
+    this._multiple = coerceBooleanProperty(value);
+  }
+  private _multiple = false;
+
+  /**
+   * Allow clearing selection
+   */
+  @property({ type: Boolean, attribute: 'allow-clear', converter: litBooleanAttrDefaultTrue })
+  get allowClear(): boolean {
+    return this._allowClear;
+  }
+  set allowClear(value: boolean) {
+    this._allowClear = coerceBooleanProperty(value);
+  }
+  private _allowClear = true;
+
+  /**
+   * Required indicator
+   */
+  @property({ type: String, attribute: 'required-indicator' })
+  requiredIndicator = '*';
+
+  @state()
+  private _slottedOptions: SelectOption[] = [];
+
+  /** Direct child assigned to `slot="hint"` (kept in sync via `_setupChildObserver`). */
+  @state()
+  private _hasSlottedHint = false;
+
+  /** Direct child assigned to `slot="empty"` (kept in sync via `_setupChildObserver`). */
+  @state()
+  private _hasSlottedEmpty = false;
+
+  @state()
+  private _open = false;
+
+  @state()
+  private _focused = false;
+
+  @state()
+  private _touched = false;
+
+  @state()
+  private _invalid = false;
+
+  @state()
+  private _filterQuery = '';
+
+  @state()
+  private _focusedIndex = -1;
+
+  /** Debounce id from `window.setTimeout` (DOM lib uses `number`). */
+  private _filterDebounceTimer: number | undefined;
+  private _clickOutsideListener?: (e: MouseEvent) => void;
+  private _dropdownScrollOrResizeListener?: () => void;
+  private _childObserver?: MutationObserver;
+
+  /**
+   * Combined options from both the `options` property and slotted `swim-option` children.
+   * Slotted children take precedence when `options` property is empty.
+   */
+  private get _allOptions(): SelectOption[] {
+    if (this.options.length > 0 && this._slottedOptions.length > 0) {
+      return [...this.options, ...this._slottedOptions];
+    }
+    return this.options.length > 0 ? this.options : this._slottedOptions;
+  }
+
+  constructor() {
+    super();
+    this._internals = this.attachInternals();
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this._collectSlottedOptions();
+    this._syncSlottedHintPresence();
+    this._syncSlottedEmptyPresence();
+    this._setupChildObserver();
+    this._updateActiveState();
+  }
+
+  disconnectedCallback() {
+    const dd = this.shadowRoot?.querySelector('.select-dropdown') as
+      (HTMLElement & { hidePopover?: () => void }) | null;
+    this._teardownDropdownTopLayer(dd);
+    super.disconnectedCallback();
+    this._removeClickOutsideListener();
+    this._childObserver?.disconnect();
+    if (this._filterDebounceTimer !== undefined) {
+      clearTimeout(this._filterDebounceTimer);
+      this._filterDebounceTimer = undefined;
+    }
+  }
+
+  /** Called by swim-option children when they connect/disconnect/update */
+  _onSlottedOptionsChange() {
+    this._collectSlottedOptions();
+  }
+
+  private _collectSlottedOptions() {
+    const optionElements = Array.from(this.querySelectorAll(':scope > swim-option'));
+    this._slottedOptions = optionElements
+      .filter(el => !el.hasAttribute('hidden'))
+      .map(el => {
+        const name = el.getAttribute('name') || '';
+        const value = el.getAttribute('value');
+        const groupAttr = el.getAttribute('group');
+        return {
+          name,
+          value: value !== null ? value : name,
+          disabled: el.hasAttribute('disabled'),
+          ...(groupAttr != null && groupAttr.trim() !== '' ? { group: groupAttr.trim() } : {})
+        };
+      });
+  }
+
+  private _syncSlottedHintPresence() {
+    const next = Array.from(this.children).some(el => el.slot === 'hint');
+    if (next !== this._hasSlottedHint) {
+      this._hasSlottedHint = next;
+    }
+  }
+
+  private _syncSlottedEmptyPresence() {
+    const next = Array.from(this.children).some(el => el.slot === 'empty');
+    if (next !== this._hasSlottedEmpty) {
+      this._hasSlottedEmpty = next;
+    }
+  }
+
+  private _setupChildObserver() {
+    this._childObserver = new MutationObserver(() => {
+      this._collectSlottedOptions();
+      this._syncSlottedHintPresence();
+      this._syncSlottedEmptyPresence();
+    });
+    this._childObserver.observe(this, {
+      childList: true,
+      subtree: false,
+      attributes: true,
+      attributeFilter: ['slot']
+    });
+  }
+
+  updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+
+    if (changedProperties.has('disabled')) {
+      if (this.disabled) {
+        this._focused = false;
+        this.removeAttribute('focused');
+        if (this._open) {
+          this._closeDropdown();
+        }
+      }
+      this._updateActiveState();
+    }
+
+    if (changedProperties.has('value')) {
+      this._updateActiveState();
+      this._validate();
+    }
+
+    if (changedProperties.has('loading')) {
+      const wasLoading = changedProperties.get('loading');
+      if (wasLoading === true && !this.loading && this._open && this.filterable && !this.disabled) {
+        this.updateComplete.then(() => {
+          if (this.filterInput && document.activeElement !== this.filterInput) {
+            this.filterInput.focus({ preventScroll: true });
+          }
+        });
+      }
+    }
+
+    if (changedProperties.has('_open')) {
+      if (this._open) {
+        this.setAttribute('open', '');
+        this._addClickOutsideListener();
+        this.updateComplete.then(() => this._layoutOpenDropdownPanel());
+        // Focus filter input if available
+        setTimeout(() => {
+          if (this.filterable && this.filterInput && !this.disabled) {
+            this.filterInput.focus();
+          }
+        }, 100);
+      } else {
+        this.removeAttribute('open');
+        this._removeClickOutsideListener();
+        this._filterQuery = '';
+        this._focusedIndex = -1;
+        if (this._filterDebounceTimer !== undefined) {
+          clearTimeout(this._filterDebounceTimer);
+          this._filterDebounceTimer = undefined;
+        }
+      }
+    }
+
+    if (
+      this._open &&
+      (changedProperties.has('options') || changedProperties.has('loading')) &&
+      !changedProperties.has('_open')
+    ) {
+      this.updateComplete.then(() => this._layoutOpenDropdownPanel());
+    }
+  }
+
+  render() {
+    const hasValue = this._value.length > 0;
+    const filteredOptions = this._getFilteredOptions();
+    const showClear = this.allowClear && hasValue && !this.disabled;
+    const showList = filteredOptions.length > 0 && !this.loading;
+    const showHint = this.withHint && (this.hint.trim() !== '' || this._hasSlottedHint);
+
+    return html`
+      <div class="select-wrap">
+        <div class="select-flex-wrap">
+          <div class="select-flex-wrap-inner">
+            <div class="select-input-wrap">
+              <div
+                class="select-input"
+                part="select"
+                role="combobox"
+                aria-disabled="${this.disabled ? 'true' : nothing}"
+                aria-expanded="${this._open}"
+                aria-haspopup="listbox"
+                aria-controls="${this.id}-listbox"
+                tabindex="${this.disabled ? -1 : 0}"
+                @click="${this._handleInputClick}"
+                @keydown="${this._handleKeyDown}"
+                @focus="${this._handleFocus}"
+                @blur="${this._handleBlur}"
+              >
+                <div class="select-value">${this._renderValue()}</div>
+                <div class="select-controls">
+                  ${
+                    showClear
+                      ? html`
+                          <button
+                            type="button"
+                            class="select-clear"
+                            aria-label="Clear selection"
+                            @click="${this._handleClear}"
+                          >
+                            <swim-icon font-icon="x"></swim-icon>
+                          </button>
+                        `
+                      : nothing
+                  }
+                  <button
+                    type="button"
+                    class="select-caret"
+                    aria-label="Toggle dropdown"
+                    ?disabled="${this.disabled}"
+                    @click="${this._handleToggle}"
+                  >
+                    <swim-icon font-icon="chevron-bold-down"></swim-icon>
+                  </button>
+                </div>
+              </div>
+              <label class="select-label" for="${this.id}">
+                ${this.label} ${this.required ? html`<span>${this.requiredIndicator}</span>` : nothing}
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="select-underline">
+          <div class="underline-fill"></div>
+        </div>
+        ${
+          showHint
+            ? html`
+                <div class="select-hint">
+                  <slot name="hint">${this.hint}</slot>
+                </div>
+              `
+            : nothing
+        }
+        ${
+          this._open
+            ? html`
+                <div
+                  class="select-dropdown swim-scroll"
+                  part="dropdown"
+                  role="listbox"
+                  id="${this.id}-listbox"
+                  popover="${SELECT_POPOVER_TOP_LAYER ? 'manual' : nothing}"
+                >
+                  ${
+                    this.filterable
+                      ? html`
+                          <div
+                            class="select-filter ${this.loading ? 'select-filter--loading' : ''} ${
+                              this.filterIcon ? 'select-filter--has-icon' : ''
+                            }"
+                            aria-busy="${this.loading}"
+                          >
+                            ${
+                              this.filterIcon
+                                ? html`
+                                    <swim-icon
+                                      class="select-filter-icon"
+                                      font-icon="${this.filterIcon}"
+                                      aria-hidden="true"
+                                    ></swim-icon>
+                                  `
+                                : nothing
+                            }
+                            <input
+                              type="search"
+                              class="select-filter-input"
+                              placeholder="${this.filterPlaceholder}"
+                              autocomplete="off"
+                              autocorrect="off"
+                              spellcheck="false"
+                              ?disabled="${this.disabled}"
+                              ?readonly="${this.loading}"
+                              .value="${this._filterQuery}"
+                              @input="${this._handleFilterInput}"
+                              @keydown="${this._handleFilterKeyDown}"
+                              @change="${(e: Event) => e.stopPropagation()}"
+                            />
+                            ${
+                              this._filterQuery
+                                ? html`
+                                    <button
+                                      type="button"
+                                      class="select-filter-clear"
+                                      aria-label="Clear filter"
+                                      ?disabled="${this.disabled || this.loading}"
+                                      @click="${this._clearFilter}"
+                                    >
+                                      <swim-icon font-icon="x"></swim-icon>
+                                    </button>
+                                  `
+                                : nothing
+                            }
+                          </div>
+                        `
+                      : nothing
+                  }
+                  ${
+                    showList
+                      ? html`
+                          <ul
+                            class="select-options ${
+                              this.grouped && this._listHasGroupHeadings(filteredOptions)
+                                ? 'select-options--grouped'
+                                : ''
+                            }"
+                          >
+                            ${
+                              this.grouped
+                                ? this._renderGroupedOptionRows(filteredOptions)
+                                : repeat(
+                                    filteredOptions,
+                                    option => this._getOptionValue(option),
+                                    (option, index) => this._renderOption(option, index)
+                                  )
+                            }
+                          </ul>
+                        `
+                      : this._renderEmptyState()
+                  }
+                </div>
+              `
+            : nothing
+        }
+      </div>
+    `;
+  }
+
+  private _renderValue() {
+    if (this._value.length === 0) {
+      return html`<span class="select-placeholder">${this.placeholder}</span>`;
+    }
+
+    if (this.multiple) {
+      return html`
+        ${this._value.map(val => {
+          const option = this._allOptions.find(opt => this._getOptionValue(opt) === val);
+          return this._renderChip(option || { name: val, value: val });
+        })}
+      `;
+    } else {
+      const option = this._allOptions.find(opt => this._getOptionValue(opt) === this._value[0]);
+      const label = option ? this._getOptionLabel(option) : String(this._value[0]);
+      return html`${label}`;
+    }
+  }
+
+  private _getOptionLabel(option: SelectOption): string {
+    const t = option.title ?? option.label;
+    if (t !== undefined && t !== null && String(t).length > 0) {
+      return String(t);
+    }
+    return option.name;
+  }
+
+  /** Non-empty section title from `group`. */
+  private _groupHeading(option: SelectOption): string {
+    const raw = option.group;
+    return raw != null && String(raw).trim() !== '' ? String(raw).trim() : '';
+  }
+
+  private _listHasGroupHeadings(options: SelectOption[]): boolean {
+    return options.some(o => this._groupHeading(o).length > 0);
+  }
+
+  private _renderGroupedOptionRows(filteredOptions: SelectOption[]): TemplateResult[] {
+    let previousHeading = '';
+    const rows: TemplateResult[] = [];
+    for (let index = 0; index < filteredOptions.length; index++) {
+      const option = filteredOptions[index];
+      const heading = this._groupHeading(option);
+      if (heading) {
+        if (heading !== previousHeading) {
+          rows.push(html`
+            <li class="select-option-group" role="presentation">
+              <span class="select-option-group-label">${heading}</span>
+            </li>
+          `);
+          previousHeading = heading;
+        }
+      } else {
+        previousHeading = '';
+      }
+      rows.push(this._renderOption(option, index));
+    }
+    return rows;
+  }
+
+  private _emptyDropdownMessage(): string {
+    if (this.loading) {
+      return this.filterSearchingPlaceholder;
+    }
+    if (this.asyncFilter && this._filterQuery.trim().length < this.filterMinLength) {
+      return this.emptyPlaceholder;
+    }
+    if (this._allOptions.length === 0) {
+      return this.asyncFilter && this._filterQuery.trim().length > 0
+        ? this.filterEmptyPlaceholder
+        : this.emptyPlaceholder;
+    }
+    return this.filterEmptyPlaceholder;
+  }
+
+  // Renders empty dropdown content or custom empty slot
+  private _renderEmptyState() {
+    const useEmptySlot = this._hasSlottedEmpty && !this.loading;
+    return html`
+      <div class="select-empty ${useEmptySlot ? 'select-empty--custom' : ''}" part="empty">
+        ${useEmptySlot ? html`<slot name="empty"></slot>` : this._emptyDropdownMessage()}
+      </div>
+    `;
+  }
+
+  private _renderChip(option: SelectOption) {
+    const label = this._getOptionLabel(option);
+    return html`
+      <div class="select-chip">
+        <span class="select-chip-label">${label}</span>
+        ${
+          !this.disabled
+            ? html`
+                <button
+                  type="button"
+                  class="select-chip-remove"
+                  aria-label="Remove ${label}"
+                  @click="${(e: Event) => this._removeChip(e, option)}"
+                >
+                  <swim-icon font-icon="x"></swim-icon>
+                </button>
+              `
+            : nothing
+        }
+      </div>
+    `;
+  }
+
+  private _renderOption(option: SelectOption, index: number) {
+    const value = this._getOptionValue(option);
+    const isSelected = this._isSelected(value);
+    const isFocused = index === this._focusedIndex;
+
+    return html`
+      <li
+        class="select-option"
+        role="option"
+        ?selected="${isSelected}"
+        ?focused="${isFocused}"
+        ?disabled="${option.disabled}"
+        aria-selected="${isSelected}"
+        @click="${() => this._handleOptionClick(option)}"
+        @mouseenter="${() => (this._focusedIndex = index)}"
+      >
+        ${this._getOptionLabel(option)}
+      </li>
+    `;
+  }
+
+  private _handleInputClick(_e: Event) {
+    if (!this.disabled) {
+      this._toggleDropdown();
+    }
+  }
+
+  private _handleToggle(e: Event) {
+    e.stopPropagation();
+    if (!this.disabled) {
+      this._toggleDropdown();
+    }
+  }
+
+  private _handleClear(e: Event) {
+    e.stopPropagation();
+    this.value = this.multiple ? [] : null;
+    this._dispatchChange();
+    this._validate();
+  }
+
+  private _handleFocus() {
+    if (this.disabled) {
+      return;
+    }
+    this._focused = true;
+    this.setAttribute('focused', '');
+  }
+
+  private _handleBlur() {
+    this._focused = false;
+    this.removeAttribute('focused');
+
+    if (!this._touched) {
+      this._touched = true;
+      this.setAttribute('touched', '');
+    }
+
+    this._validate();
+  }
+
+  private _handleKeyDown(e: KeyboardEvent) {
+    if (this.disabled) {
+      return;
+    }
+    switch (e.key) {
+      case 'Enter':
+      case ' ':
+        if (!this._open) {
+          e.preventDefault();
+          this._toggleDropdown();
+        }
+        break;
+      case 'Escape':
+        if (this._open) {
+          e.preventDefault();
+          this._closeDropdown();
+        }
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        if (!this._open) {
+          this._openDropdown();
+        } else {
+          this._moveFocus(1);
+        }
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (this._open) {
+          this._moveFocus(-1);
+        }
+        break;
+    }
+  }
+
+  private _emitFilterChange(query: string) {
+    this.dispatchEvent(
+      new CustomEvent('filter-change', {
+        detail: { query },
+        bubbles: false,
+        composed: false
+      })
+    );
+  }
+
+  private _handleFilterInput(e: Event) {
+    const target = e.target as HTMLInputElement;
+    this._filterQuery = target.value;
+    this._focusedIndex = 0;
+
+    if (this.asyncFilter) {
+      if (this._filterDebounceTimer !== undefined) {
+        clearTimeout(this._filterDebounceTimer);
+        this._filterDebounceTimer = undefined;
+      }
+      const q = this._filterQuery.trim();
+      if (q.length < this.filterMinLength) {
+        this._emitFilterChange('');
+        return;
+      }
+      this._filterDebounceTimer = window.setTimeout(() => {
+        this._filterDebounceTimer = undefined;
+        this._emitFilterChange(q);
+      }, this.filterDebounceMs);
+    }
+  }
+
+  private _clearFilter(e: Event) {
+    e.stopPropagation();
+    if (this.disabled || this.loading) {
+      return;
+    }
+    this._filterQuery = '';
+    this._focusedIndex = 0;
+    if (this.filterInput) {
+      this.filterInput.value = '';
+      this.filterInput.focus({ preventScroll: true });
+    }
+    if (this.asyncFilter) {
+      if (this._filterDebounceTimer !== undefined) {
+        clearTimeout(this._filterDebounceTimer);
+        this._filterDebounceTimer = undefined;
+      }
+      this._emitFilterChange('');
+    }
+    this.requestUpdate();
+  }
+
+  private _handleFilterKeyDown(e: KeyboardEvent) {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        this._moveFocus(1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        this._moveFocus(-1);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        const filteredOptions = this._getFilteredOptions();
+        if (filteredOptions[this._focusedIndex]) {
+          this._handleOptionClick(filteredOptions[this._focusedIndex]);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        this._closeDropdown();
+        this.selectInput?.focus();
+        break;
+    }
+  }
+
+  private _handleOptionClick(option: SelectOption) {
+    if (option.disabled) return;
+
+    const value = this._getOptionValue(option);
+
+    if (this.multiple) {
+      const currentValues = [...this._value];
+      const index = currentValues.indexOf(value);
+
+      if (index > -1) {
+        currentValues.splice(index, 1);
+      } else {
+        currentValues.push(value);
+      }
+
+      this.value = currentValues;
+    } else {
+      this.value = value;
+      this._closeDropdown();
+    }
+
+    this._dispatchChange();
+    this._validate();
+  }
+
+  private _removeChip(e: Event, option: SelectOption) {
+    e.stopPropagation();
+    const value = this._getOptionValue(option);
+    const currentValues = this._value.filter(v => v !== value);
+    this.value = currentValues;
+    this._dispatchChange();
+    this._validate();
+  }
+
+  private _toggleDropdown() {
+    this._open ? this._closeDropdown() : this._openDropdown();
+  }
+
+  private _openDropdown() {
+    if (this.disabled) return;
+    this._open = true;
+    this._focusedIndex = 0;
+    this.dispatchEvent(new Event('dropdown-open', { bubbles: false, composed: false }));
+  }
+
+  private _closeDropdown() {
+    const dd = this.shadowRoot?.querySelector('.select-dropdown') as
+      (HTMLElement & { hidePopover?: () => void }) | null;
+    this._teardownDropdownTopLayer(dd);
+    this._open = false;
+    this.dispatchEvent(new Event('dropdown-close', { bubbles: false, composed: false }));
+  }
+
+  private _moveFocus(direction: number) {
+    const filteredOptions = this._getFilteredOptions();
+    const maxIndex = filteredOptions.length - 1;
+
+    let newIndex = this._focusedIndex + direction;
+
+    if (newIndex < 0) {
+      newIndex = maxIndex;
+    } else if (newIndex > maxIndex) {
+      newIndex = 0;
+    }
+
+    this._focusedIndex = newIndex;
+  }
+
+  private _getFilteredOptions(): SelectOption[] {
+    if (this.asyncFilter) {
+      return this._allOptions;
+    }
+    if (!this._filterQuery.trim()) {
+      return this._allOptions;
+    }
+
+    return this._allOptions.filter(option =>
+      optionMatchesFilter(option, this._filterQuery, { filterCaseSensitive: false })
+    );
+  }
+
+  private _getOptionValue(option: SelectOption): any {
+    return option.value !== undefined ? option.value : option.name;
+  }
+
+  private _isSelected(value: any): boolean {
+    return this._value.includes(value);
+  }
+
+  private _dispatchChange() {
+    this.dispatchEvent(
+      new CustomEvent('change', {
+        detail: { value: this.value },
+        bubbles: false,
+        composed: false
+      })
+    );
+  }
+
+  private _validate() {
+    let isValid = true;
+
+    if (this.required && this._value.length === 0) {
+      isValid = false;
+    }
+
+    this._invalid = !isValid;
+
+    if (this._invalid) {
+      this.setAttribute('invalid', '');
+      this._internals.setValidity({ valueMissing: true }, 'Please select an option');
+    } else {
+      this.removeAttribute('invalid');
+      this._internals.setValidity({});
+    }
+
+    return isValid;
+  }
+
+  private _updateActiveState() {
+    const hasValue = this._value.length > 0;
+    const hasPlaceholder = !!this.placeholder;
+
+    if (this._focused || hasValue || this._open) {
+      this.setAttribute('active', '');
+    } else {
+      this.removeAttribute('active');
+    }
+
+    if (hasPlaceholder) {
+      this.setAttribute('has-placeholder', '');
+    } else {
+      this.removeAttribute('has-placeholder');
+    }
+
+    if (!this.label) {
+      this.setAttribute('no-label', '');
+    } else {
+      this.removeAttribute('no-label');
+    }
+  }
+
+  private _addClickOutsideListener() {
+    this._clickOutsideListener = (e: MouseEvent) => {
+      if (!e.composedPath().includes(this)) {
+        this._closeDropdown();
+      }
+    };
+    setTimeout(() => {
+      document.addEventListener('click', this._clickOutsideListener!);
+    }, 0);
+  }
+
+  private _removeClickOutsideListener() {
+    if (this._clickOutsideListener) {
+      document.removeEventListener('click', this._clickOutsideListener);
+      this._clickOutsideListener = undefined;
+    }
+  }
+
+  /** Manual popover + fixed geometry so the list escapes overflow/transform (e.g. medium dialog). */
+  private _layoutOpenDropdownPanel(): void {
+    if (!this._open || !SELECT_POPOVER_TOP_LAYER) return;
+    const dd = this.shadowRoot?.querySelector('.select-dropdown') as
+      (HTMLElement & { showPopover?: () => void }) | null;
+    if (!dd || !this.selectInput || typeof dd.showPopover !== 'function') {
+      return;
+    }
+    this._applyDropdownPanelGeometry(dd, this.selectInput);
+    try {
+      dd.showPopover();
+    } catch {
+      /* already open or popover not available at runtime */
+    }
+    this._addDropdownScrollListener();
+  }
+
+  private _applyDropdownPanelGeometry(dd: HTMLElement, trigger: HTMLElement): void {
+    const tr = trigger.getBoundingClientRect();
+    const host = this.getBoundingClientRect();
+    const gap = 8;
+    const maxH = Math.min(300, Math.max(0, window.innerHeight - tr.bottom - gap - 8));
+    const useHost = this.dropdownAlign === 'center';
+    const panelW = useHost ? host.width : tr.width;
+    let leftPx = useHost ? host.left : tr.left;
+    if (useHost) {
+      const edge = 8;
+      leftPx = Math.min(Math.max(leftPx, edge), window.innerWidth - panelW - edge);
+    }
+    // UA `[popover]` uses `inset: 0; margin: auto` which centers the panel and fights our anchors.
+    dd.style.setProperty('inset', 'auto');
+    dd.style.setProperty('margin', '0');
+    dd.style.setProperty('height', 'auto');
+    dd.style.setProperty('position', 'fixed');
+    dd.style.setProperty('left', `${leftPx}px`);
+    dd.style.setProperty('top', `${tr.bottom + gap}px`);
+    dd.style.setProperty('width', `${panelW}px`);
+    dd.style.setProperty('max-height', `${maxH}px`);
+    dd.style.setProperty('z-index', '2147483646');
+    dd.style.setProperty('animation', 'none');
+    dd.style.setProperty('transform', 'none');
+  }
+
+  private _clearDropdownPanelGeometry(dd: HTMLElement): void {
+    [
+      'inset',
+      'margin',
+      'height',
+      'position',
+      'left',
+      'top',
+      'width',
+      'max-height',
+      'z-index',
+      'animation',
+      'transform'
+    ].forEach(p => dd.style.removeProperty(p));
+  }
+
+  private _teardownDropdownTopLayer(dd: (HTMLElement & { hidePopover?: () => void }) | null): void {
+    this._removeDropdownScrollListener();
+    if (!dd || !SELECT_POPOVER_TOP_LAYER) return;
+    try {
+      dd.hidePopover?.();
+    } catch {
+      /* not shown */
+    }
+    this._clearDropdownPanelGeometry(dd);
+  }
+
+  private _addDropdownScrollListener(): void {
+    if (!SELECT_POPOVER_TOP_LAYER || this._dropdownScrollOrResizeListener) return;
+    this._dropdownScrollOrResizeListener = () => {
+      if (!this._open) return;
+      const panel = this.shadowRoot?.querySelector('.select-dropdown') as HTMLElement | null;
+      if (panel && this.selectInput) {
+        this._applyDropdownPanelGeometry(panel, this.selectInput);
+      }
+    };
+    window.addEventListener('scroll', this._dropdownScrollOrResizeListener, true);
+    window.addEventListener('resize', this._dropdownScrollOrResizeListener);
+  }
+
+  private _removeDropdownScrollListener(): void {
+    if (!this._dropdownScrollOrResizeListener) return;
+    window.removeEventListener('scroll', this._dropdownScrollOrResizeListener, true);
+    window.removeEventListener('resize', this._dropdownScrollOrResizeListener);
+    this._dropdownScrollOrResizeListener = undefined;
+  }
+
+  // Form API
+  formResetCallback() {
+    this.value = this.multiple ? [] : null;
+    this._touched = false;
+    this.removeAttribute('touched');
+  }
+
+  formDisabledCallback(disabled: boolean) {
+    this.disabled = disabled;
+  }
+}
+
+if (!customElements.get(SELECT_TAG)) {
+  customElements.define(SELECT_TAG, SwimSelect);
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'swim-select': SwimSelect;
+  }
+}

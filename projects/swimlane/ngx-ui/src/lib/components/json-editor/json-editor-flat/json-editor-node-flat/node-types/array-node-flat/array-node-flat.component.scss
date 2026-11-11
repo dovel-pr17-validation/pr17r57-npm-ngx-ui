@@ -1,0 +1,18 @@
+@use 'colors/colors' as colors;
+@use '../node-types.extensions';
+
+.array-node-flat {
+  margin-top: var(--spacing-4);
+
+  .array-node-content {
+    @extend %node-type;
+
+    &.no-margin {
+      margin-bottom: var(--spacing-0);
+    }
+  }
+
+  .add-button {
+    @extend %add-button;
+  }
+}

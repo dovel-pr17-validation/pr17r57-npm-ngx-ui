@@ -1,0 +1,128 @@
+@use 'colors/colors' as colors;
+@use 'components/buttons' as buttons;
+
+.ngx-button {
+  cursor: pointer;
+
+  &,
+  &.btn {
+    transition: background-color 0.25s ease-out;
+    padding: var(--spacing-0);
+  }
+
+  button {
+    padding: 0.35em 0.55em;
+    width: 100%;
+    outline-offset: 2px;
+    border-radius: var(--radius-4);
+
+    > .content {
+      text-overflow: ellipsis;
+      overflow-x: clip;
+      overflow-y: visible;
+      width: 100%;
+      display: block;
+      white-space: nowrap;
+    }
+
+    &:focus,
+    &:focus-within {
+      outline: none;
+    }
+
+    // Focus ring on native button
+    &:focus-visible {
+      outline: 2px solid buttons.$button-fill-color;
+    }
+  }
+
+  &.disabled-button {
+    pointer-events: none;
+  }
+
+  &.success,
+  &.fail {
+    color: black !important;
+  }
+
+  &.in-progress {
+    color: var(--white) !important;
+  }
+
+  &.success {
+    background-color: var(--green-500) !important;
+    background: var(--green-500) !important;
+    border: 1px solid var(--green-500) !important;
+  }
+
+  &.fail {
+    background-color: var(--red-500) !important;
+    background: var(--red-500) !important;
+    border: 1px solid var(--red-500) !important;
+  }
+
+  &.in-progress,
+  &.success,
+  &.fail {
+    pointer-events: auto;
+    cursor: wait !important;
+    position: relative;
+    opacity: 1 !important;
+
+    button {
+      opacity: 1;
+    }
+
+    /* disabled click, but allows cursor */
+    &:active,
+    & * {
+      pointer-events: none;
+    }
+
+    .content {
+      opacity: 0;
+      transition: opacity 0.25s ease-out;
+    }
+
+    &.active .content {
+      opacity: 1;
+    }
+
+    .state-icon {
+      position: absolute;
+      display: inline-block;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      .icon {
+        height: 1em;
+        width: 1em;
+        font-weight: var(--font-weight-bold);
+        color: var(--white);
+        overflow: hidden;
+        font-size: var(--font-size-m);
+      }
+    }
+  }
+
+  // focus ring colors
+  &.btn-primary button {
+    outline-color: var(--blue-500);
+  }
+
+  &.btn-warning button {
+    outline-color: var(--orange-500);
+  }
+
+  &.btn-danger button {
+    outline-color: var(--red-400);
+  }
+
+  &.btn-bordered,
+  &.btn-primary.btn-bordered {
+    button {
+      outline-color: var(--blue-400);
+    }
+  }
+}

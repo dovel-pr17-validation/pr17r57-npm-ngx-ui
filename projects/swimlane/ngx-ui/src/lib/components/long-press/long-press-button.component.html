@@ -1,0 +1,32 @@
+<div
+  long-press
+  [duration]="duration"
+  [disabled]="disabled"
+  (longPressStart)="onLongPressStart()"
+  (longPressFinish)="onLongPressFinish($event)"
+  (longPressCancel)="onLongPressCancel()"
+  >
+  <span class="inner-background"></span>
+  <svg viewBox="-170 -170 340 340">
+    <g transform="rotate(-90)">
+      @if (state !== LongPressButtonState.Submitted) {
+        <circle
+          class="loading-circle"
+          r="160"
+          [@circleAnimation]="{ value: pressed ? 'active' : 'inactive', params: { duration: duration } }"
+          />
+      }
+      @if (state === LongPressButtonState.Submitted) {
+        <circle class="full-circle" r="160" />
+      }
+    </g>
+  </svg>
+  <button [disabled]="disabled">
+    @if (state === LongPressButtonState.Active) {
+      <ngx-icon [fontIcon]="icon"></ngx-icon>
+    }
+    @if (state === LongPressButtonState.Submitted) {
+      <ngx-icon fontIcon="check"></ngx-icon>
+    }
+  </button>
+</div>

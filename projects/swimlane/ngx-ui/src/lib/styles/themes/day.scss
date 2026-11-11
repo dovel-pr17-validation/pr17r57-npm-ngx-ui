@@ -1,0 +1,5 @@
+@use 'colors/colors' as colors;
+
+.day-theme {
+  background: colors.$color-grey-100;
+}

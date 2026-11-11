@@ -1,0 +1,57 @@
+<div class="ngx-stepper--steps" (resizeObserver)="onResize()">
+  <ng-content select="ngx-step"></ng-content>
+</div>
+
+<div class="ngx-stepper--bar-track">
+  @if (trackBar && !vertical) {
+  <div
+    class="ngx-stepper--bar"
+    [@stepperBarHorizontalTransition]="{
+      value: barState,
+      params: { xOffset: steps.first.width * completeSteps, width: steps.first.stepWidth }
+    }"
+  ></div>
+  } @if (trackBar && vertical) {
+  <div
+    class="ngx-stepper--bar"
+    [@stepperBarVerticalTransition]="{
+      value: barState,
+      params: { yOffset: steps.first.height * completeSteps, height: steps.first.stepHeight }
+    }"
+  ></div>
+  }
+</div>
+
+<ng-container *ngTemplateOutlet="vertical ? verticalTpl : horizontalTpl"></ng-container>
+
+<ng-template #verticalTpl>
+  @for (step of steps; track step; let i = $index) {
+  <div
+    class="ngx-stepper--content"
+    [class.active]="active === i"
+    [@stepVerticalTransition]="getStepState(i)"
+    (@stepVerticalTransition.start)="onStepAnimationStart(i)"
+    (@stepVerticalTransition.done)="onStepAnimationEnd(i)"
+  >
+    @if (active === i) {
+    <ng-template [ngTemplateOutlet]="$safeNavigationMigration(step.content?.first?.template)"></ng-template>
+    }
+  </div>
+  }
+</ng-template>
+
+<ng-template #horizontalTpl>
+  @for (step of steps; track step; let i = $index) {
+  <div
+    class="ngx-stepper--content"
+    [class.active]="active === i"
+    [@stepHorizontalTransition]="getStepState(i)"
+    (@stepHorizontalTransition.start)="onStepAnimationStart(i)"
+    (@stepHorizontalTransition.done)="onStepAnimationEnd(i)"
+  >
+    @if (active === i) {
+    <ng-template [ngTemplateOutlet]="$safeNavigationMigration(step.content?.first?.template)"></ng-template>
+    }
+  </div>
+  }
+</ng-template>
