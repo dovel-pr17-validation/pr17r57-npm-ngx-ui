@@ -254,6 +254,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@angular-devkit/architect@npm:0.2202.6":
+  version: 0.2202.6
+  resolution: "@angular-devkit/architect@npm:0.2202.6"
+  dependencies:
+    "@angular-devkit/core": "npm:22.2.6"
+    rxjs: "npm:7.8.2"
+  bin:
+    architect: bin/cli.js
+  checksum: 10c0/b680450e33256d4831e7af2d7debe87e89c799b9b5275bfe551f94256d3fa2d40ff6b8675ebbbf96fdca56030a0dd981842745cb8ae788efadd22bdbfb7814a3
+  languageName: node
+  linkType: hard
+
 "@angular-devkit/architect@npm:~0.1800.0":
   version: 0.1800.7
   resolution: "@angular-devkit/architect@npm:0.1800.7"
@@ -435,6 +447,25 @@ __metadata:
     chokidar:
       optional: true
   checksum: 10c0/2f028dc68fe89eeb1fa9103aba971daaa95b50b4971e2a5fa771e5f85f0178198877dccc1ce6baaa9894f23ff47267fa8eafa397574ddcdcdea0353eaed9d3d1
+  languageName: node
+  linkType: hard
+
+"@angular-devkit/core@npm:22.2.6":
+  version: 22.2.6
+  resolution: "@angular-devkit/core@npm:22.2.6"
+  dependencies:
+    ajv: "npm:8.20.0"
+    ajv-formats: "npm:3.0.1"
+    jsonc-parser: "npm:3.3.1"
+    picomatch: "npm:4.0.7"
+    rxjs: "npm:7.8.2"
+    source-map: "npm:0.8.0"
+  peerDependencies:
+    chokidar: ^5.0.0
+  peerDependenciesMeta:
+    chokidar:
+      optional: true
+  checksum: 10c0/bf2e98908780f486644b4d7b9561935c6c90135258c78a1addc2124bf532761751762a19eec4febfb35c33ea73b5d24c2da6d7b82e498b21d209f7715967a3de
   languageName: node
   linkType: hard
 
@@ -15411,7 +15442,7 @@ __metadata:
     "@analogjs/vite-plugin-angular": "npm:^2.6.3"
     "@analogjs/vitest-angular": "npm:^2.6.3"
     "@angular-builders/custom-webpack": "npm:^22.0.1"
-    "@angular-devkit/architect": "npm:0.2200.7"
+    "@angular-devkit/architect": "npm:0.2202.6"
     "@angular-devkit/build-angular": "npm:^22.0.7"
     "@angular-devkit/core": "npm:^22.0.7"
     "@angular-devkit/schematics": "npm:^22.0.7"
@@ -16572,6 +16603,13 @@ __metadata:
   version: 4.0.4
   resolution: "picomatch@npm:4.0.4"
   checksum: 10c0/e2c6023372cc7b5764719a5ffb9da0f8e781212fa7ca4bd0562db929df8e117460f00dff3cb7509dacfc06b86de924b247f504d0ce1806a37fac4633081466b0
+  languageName: node
+  linkType: hard
+
+"picomatch@npm:4.0.7":
+  version: 4.0.7
+  resolution: "picomatch@npm:4.0.7"
+  checksum: 10c0/beb6ae02c43ae44e84883b90830196d9046b1726ead292adcf7f57945e0bb0d992d68563d87e03b484b6f3c9a5c6defda7523477f047d7f0e663f126cc01787f
   languageName: node
   linkType: hard
 
@@ -18615,6 +18653,13 @@ __metadata:
   version: 0.7.6
   resolution: "source-map@npm:0.7.6"
   checksum: 10c0/59f6f05538539b274ba771d2e9e32f6c65451982510564438e048bc1352f019c6efcdc6dd07909b1968144941c14015c2c7d4369fb7c4d7d53ae769716dcc16c
+  languageName: node
+  linkType: hard
+
+"source-map@npm:0.8.0":
+  version: 0.8.0
+  resolution: "source-map@npm:0.8.0"
+  checksum: 10c0/fd2a5b81a1bf40f6155592f19c44abb46fc75b0f0f9473dd40c665b6f3866516a26218dad3d76b58b8b3e44560f3ab2191a837e1ce6631987e51a2db2e1cac56
   languageName: node
   linkType: hard
 
