@@ -169,15 +169,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@analogjs/vite-plugin-angular@npm:^2.6.3":
-  version: 2.6.3
-  resolution: "@analogjs/vite-plugin-angular@npm:2.6.3"
+"@analogjs/vite-plugin-angular@npm:^2.9.6":
+  version: 2.9.6
+  resolution: "@analogjs/vite-plugin-angular@npm:2.9.6"
   dependencies:
     magic-string: "npm:^0.30.21"
     obug: "npm:^2.1.1"
     oxc-parser: "npm:^0.121.0"
     tinyglobby: "npm:^0.2.14"
-    ts-morph: "npm:^21.0.0"
   peerDependencies:
     "@angular-devkit/build-angular": ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0 || ^22.0.0
     "@angular/build": ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0 || ^22.0.0
@@ -189,23 +188,23 @@ __metadata:
       optional: true
     vite:
       optional: true
-  checksum: 10c0/dc50e10d429513813b366a4a08eca40248aaa2c5595dcf891f4a5fc2125c4f2e0c4fd7e42525d58a04196561a56081207167a10faa89fc10ec8ea77e0720ba4b
+  checksum: 10c0/31b55dce7bdac2cb2ce2eb1cdca51d4cc69a64a39d76f65b21dfb68b21a0b2ae153a99088c0ab6457dbc427e56f8316b77700c956db3cc04f676255a7d65c601
   languageName: node
   linkType: hard
 
-"@analogjs/vitest-angular@npm:^2.6.3":
-  version: 2.6.3
-  resolution: "@analogjs/vitest-angular@npm:2.6.3"
+"@analogjs/vitest-angular@npm:^2.9.6":
+  version: 2.9.6
+  resolution: "@analogjs/vitest-angular@npm:2.9.6"
   peerDependencies:
     "@analogjs/vite-plugin-angular": "*"
     "@angular-devkit/architect": ">=0.1700.0 < 0.2300.0 || >=0.2200.0 < 0.2300.0"
     "@angular-devkit/schematics": ">=17.0.0"
-    vitest: ^1.3.1 || ^2.0.0 || ^3.0.0 || ^4.0.0
+    vitest: ^1.3.1 || ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
     zone.js: ">=0.14.0"
   peerDependenciesMeta:
     zone.js:
       optional: true
-  checksum: 10c0/cf740ff3ddce09619cc32a3b47e484eb395706eb42217934c761083f731f43467df8f429a5375cace4545f0233b8e641175b158b72cd59cab56a11580afbabb1
+  checksum: 10c0/e059f829fa4515ad0914f94b4ec0c4ef3a4264bbdf102775de07c663db5f138cce0d55331c1845e34efd89b0c65c1a7a971083fa94b8c18dbb349cf9ab382900
   languageName: node
   linkType: hard
 
@@ -5521,18 +5520,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ts-morph/common@npm:~0.22.0":
-  version: 0.22.0
-  resolution: "@ts-morph/common@npm:0.22.0"
-  dependencies:
-    fast-glob: "npm:^3.3.2"
-    minimatch: "npm:^9.0.3"
-    mkdirp: "npm:^3.0.1"
-    path-browserify: "npm:^1.0.1"
-  checksum: 10c0/1f1ff7fee54414e09803b1ba559ff51881b821c19bc97cb19d06fc46c58957dea4a58e6a83e9f2e30e08c8179d6d142e45be329d9242f410323795b5c1e04806
-  languageName: node
-  linkType: hard
-
 "@tsconfig/node10@npm:^1.0.7":
   version: 1.0.12
   resolution: "@tsconfig/node10@npm:1.0.12"
@@ -9016,13 +9003,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"code-block-writer@npm:^12.0.0":
-  version: 12.0.0
-  resolution: "code-block-writer@npm:12.0.0"
-  checksum: 10c0/ced73cdc466bff968bba9e8e32340d88420d25a229b9269f7425a10a7c2c9a12ca702dcb601b2462b96472d354f021cf66e552179fcbe30c8f7ecd0173c5fa07
-  languageName: node
-  linkType: hard
-
 "codemirror@npm:5.65.8":
   version: 5.65.8
   resolution: "codemirror@npm:5.65.8"
@@ -11335,7 +11315,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.2.9, fast-glob@npm:^3.3.2":
+"fast-glob@npm:^3.2.9":
   version: 3.3.3
   resolution: "fast-glob@npm:3.3.3"
   dependencies:
@@ -14929,7 +14909,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^9.0.3, minimatch@npm:^9.0.4":
+"minimatch@npm:^9.0.4":
   version: 9.0.9
   resolution: "minimatch@npm:9.0.9"
   dependencies:
@@ -15064,15 +15044,6 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: 10c0/46ea0f3ffa8bc6a5bc0c7081ffc3907777f0ed6516888d40a518c5111f8366d97d2678911ad1a6882bf592fa9de6c784fea32e1687bb94e1f4944170af48a5cf
-  languageName: node
-  linkType: hard
-
-"mkdirp@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "mkdirp@npm:3.0.1"
-  bin:
-    mkdirp: dist/cjs/src/bin.js
-  checksum: 10c0/9f2b975e9246351f5e3a40dcfac99fcd0baa31fbfab615fe059fb11e51f10e4803c63de1f384c54d656e4db31d000e4767e9ef076a22e12a641357602e31d57d
   languageName: node
   linkType: hard
 
@@ -15408,8 +15379,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "ngx-ui@workspace:."
   dependencies:
-    "@analogjs/vite-plugin-angular": "npm:^2.6.3"
-    "@analogjs/vitest-angular": "npm:^2.6.3"
+    "@analogjs/vite-plugin-angular": "npm:^2.9.6"
+    "@analogjs/vitest-angular": "npm:^2.9.6"
     "@angular-builders/custom-webpack": "npm:^22.0.1"
     "@angular-devkit/architect": "npm:0.2200.7"
     "@angular-devkit/build-angular": "npm:^22.0.7"
@@ -16415,13 +16386,6 @@ __metadata:
   version: 0.1.1
   resolution: "pascalcase@npm:0.1.1"
   checksum: 10c0/48dfe90618e33810bf58211d8f39ad2c0262f19ad6354da1ba563935b5f429f36409a1fb9187c220328f7a4dc5969917f8e3e01ee089b5f1627b02aefe39567b
-  languageName: node
-  linkType: hard
-
-"path-browserify@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "path-browserify@npm:1.0.1"
-  checksum: 10c0/8b8c3fd5c66bd340272180590ae4ff139769e9ab79522e2eb82e3d571a89b8117c04147f65ad066dccfb42fcad902e5b7d794b3d35e0fd840491a8ddbedf8c66
   languageName: node
   linkType: hard
 
@@ -19502,16 +19466,6 @@ __metadata:
   peerDependencies:
     typescript: ">=4.8.4"
   checksum: 10c0/767849383c114e7f1971fa976b20e73ac28fd0c70d8d65c0004790bf4d8f89888c7e4cf6d5949f9c1beae9bc3c64835bef77bbe27fddf45a3c7b60cebcf85c8c
-  languageName: node
-  linkType: hard
-
-"ts-morph@npm:^21.0.0":
-  version: 21.0.1
-  resolution: "ts-morph@npm:21.0.1"
-  dependencies:
-    "@ts-morph/common": "npm:~0.22.0"
-    code-block-writer: "npm:^12.0.0"
-  checksum: 10c0/ed1d4ccdeba2300cfa236f2aaf64bb462aa386141e659a08d8a2eb96d3b4b274abc9d97b8dd06a0c13af79187b197f38f6a8baca709f99d11094a82c8abccf27
   languageName: node
   linkType: hard
 
